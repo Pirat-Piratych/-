@@ -192,7 +192,31 @@ tr:last-child td {
   background: #f1f5f9;
   border-radius: 20px;
   padding: 1.5rem;
-  border-left: 6px solid #2563eb;
+  border-left: 6px solid #ccc;   /* ← базовая полоса, цвет не важен */
+}
+
+.route-card.m2 {
+  border-left-color: #2563eb;   /* синий */
+}
+
+.route-card.m24 {
+  border-left-color: #16a34a;   /* зелёный */
+}
+
+.route-card.m24k {
+  border-left-color: #0d7934;   /* тёмно-зелёный */
+}
+
+.route-card.m102 {
+  border-left-color: #d97706;   /* оранжевый */
+}
+
+.route-card.s22 {
+  border-left-color: #dc2626;   /* красный */
+}
+
+.route-card.m408 {
+  border-left-color: #7c3aed;   /* фиолетовый */
 }
 
 .route-card h3 {
