@@ -220,7 +220,6 @@
             <td>${emp.name}</td>
             <td>${emp.username}</td>
             <td>${ROLE_NAMES[emp.role] || emp.role}</td>
-            <td>${emp.createdAt || 'Не указана'}</td>
             <td>
               <button class="btn-danger" onclick="deleteEmployee('${emp.username}')">Удалить</button>
             </td>
