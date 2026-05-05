@@ -185,6 +185,24 @@
             <div class="stat-item">👥 Всего: <span id="totalCount">0</span></div>
           </div>
 
+          <!-- Списки сотрудников по статусам -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin: 1.5rem 0;">
+  <div style="background: #f0fdf4; padding: 1rem; border-radius: 16px; border-left: 4px solid #16a34a;">
+    <h4 style="color: #16a34a; margin-bottom: 0.5rem;">🟢 На линии</h4>
+    <div id="onlineList"><em style="color: #94a3b8;">Никого нет</em></div>
+  </div>
+  
+  <div style="background: #fef3c7; padding: 1rem; border-radius: 16px; border-left: 4px solid #d97706;">
+    <h4 style="color: #d97706; margin-bottom: 0.5rem;">🟡 АФК</h4>
+    <div id="afkList"><em style="color: #94a3b8;">Никого нет</em></div>
+  </div>
+  
+  <div style="background: #fef2f2; padding: 1rem; border-radius: 16px; border-left: 4px solid #dc2626;">
+    <h4 style="color: #dc2626; margin-bottom: 0.5rem;">🔴 Не на линии</h4>
+    <div id="offlineList"><em style="color: #94a3b8;">Никого нет</em></div>
+  </div>
+</div>
+
           <!-- Таблица сотрудников -->
           <div class="employees-table">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
