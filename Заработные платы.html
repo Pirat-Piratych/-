@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ООО «МирнГорТранс» • Заработные платы</title>
+  <link rel="stylesheet" href="Общие стили.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Шапка -->
+    <header class="header">
+      <div class="logo-area">
+        <div class="logo-icon">🚌</div>
+        <div class="logo-text">ООО<span>«МирнГорТранс»</span></div>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html">О нас</a>
+        <a href="Заработные платы.html" class="active">Зарплаты</a>
+        <a href="Маршруты.html">Маршруты</a>
+        <a href="Выходы на маршруты.html" id="lineMenuLink" style="display: none;">Выход на маршруты</a>
+        <a href="admin.html" id="adminMenuLink" style="display: none;">Управление</a>
+        <span id="authArea"></span>
+      </nav>
+    </header>
+
+    <!-- Основной контент -->
+    <main>
+      <section class="page">
+        <h2>💰 Заработные платы</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>№ маршрута</th>
+              <th>Заработные платы</th>
+              <th>Информатор</th>
+              <th>Видеоотчёт</th>
+              <th>Графики</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>м2 (дневной)</td>
+              <td>15.000₽</td>
+              <td>7.500₽</td>
+              <td>х1.5</td>
+            </tr>
+            <tr>
+              <td>м2 (ночной)</td>
+              <td>11.250₽</td>
+              <td>5.625₽</td>
+              <td>х1.5</td>
+            </tr>
+            <tr>
+              <td>24</td>
+              <td>22.500₽</td>
+              <td>11.250₽</td>
+              <td>х1.5</td>
+            </tr>
+            <tr>
+              <td>24к</td>
+              <td>11.250₽</td>
+              <td>5.625₽</td>
+              <td>х1.5</td>
+            </tr>
+            <tr>
+              <td>102</td>
+              <td>15.000₽</td>
+              <td>7.500₽</td>
+              <td>х1.5</td>
+            </tr>
+            <td>с22</td>
+            <td>30.000₽</td>
+            <td>15.000₽</td>
+            <td>х1.5</td>
+            <td>15/000₽</td>
+            </tr>
+            <td>408</td>
+            <td>22.500₽</td>
+            <td>11.250₽</td>
+            <td>х1.5</td>
+            <td>11.250₽</td>
+          </tbody>
+        </table>
+        <p style="margin-top: 1rem; color: #4b5563;">✔ Выплаты раз в неделю •  • </p>
+      </section>
+    </main>
+  </div>
+
+  <script src="Общая логика.js"></script>
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+    initAuth();
+    updateLineMenuVisibility();
+    updateAdminMenuVisibility();
+});
+  </script>
+</body>
+</html>
