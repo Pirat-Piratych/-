@@ -96,26 +96,27 @@ body {
   font-weight: 600;
 }
 
-/* Кнопки */
 .btn-login, .btn-logout {
   background: #2563eb;
-  color: white;
-  padding: 0.5rem 1.4rem;
+  color: white !important;
+  padding: 0.7rem 1rem !important;
   border-radius: 30px;
   text-decoration: none;
   font-weight: 600;
   transition: 0.2s;
   border: none;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 1.1rem !important;
+  display: inline-block;
+  min-width: 100px;
+  text-align: center;
 }
-
 .btn-login:hover {
   background: #1d4ed8;
 }
 
 .btn-logout {
-  background: #e2e8f0;
+  background: #2563eb;
   color: #1e293b;
 }
 

@@ -10,8 +10,9 @@ if (!localStorage.getItem('atp_users')) {
 
 // Иерархия ролей (кто кого может создавать)
 const ROLE_HIERARCHY = {
-  'admin': ['admin', 'zamdirektora', 'brigadir', 'driver'],           // Админ может всех
-  'zamdirektora': ['brigadir', 'driver'],                              // Зам может бригадиров и водителей
+  'admin': ['gendirector','zamdirektor', 'brigadir', 'driver'],         // Админ может всех
+  'gendirector': ['zamdirektor', 'brigadir', 'driver'],           // Генеральный директор может всех
+  'zamdirektor': ['brigadir', 'driver'],                              // Зам может бригадиров и водителей
   'brigadir': [],                                              // Бригадир никого
   'driver': []                                                         // Водитель никого
 };
@@ -19,7 +20,8 @@ const ROLE_HIERARCHY = {
 // Названия должностей
 const ROLE_NAMES = {
   'admin': 'Администратор',
-  'zamdirektora': 'Заместитель директора',
+  'gendirector': 'Генеральный директор',
+  'zamdirektor': 'Заместитель директора',
   'brigadir': 'Бригадир',
   'driver': 'Водитель'
 };
@@ -132,7 +134,7 @@ function updateAdminMenuVisibility() {
   if (!adminLink) return;
   
   const user = getCurrentUser();
-  // Админ-панель доступна admin и zamdirektora
+  // Админ-панель доступна gendirector и zamdirektor
   if (user && (user.role === 'admin' || user.role === 'zamdirektora')) {
     adminLink.style.display = 'inline';
   } else {
