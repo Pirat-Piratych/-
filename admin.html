@@ -103,45 +103,35 @@
       updateAdminMenuVisibility();
       checkAccessAndInit();
     });
-
+  
     function checkAccessAndInit() {
       const user = getCurrentUser();
-      console.log('Текущий пользователь:', user);
-      
       const noAccessMessage = document.getElementById('noAccessMessage');
       const adminContent = document.getElementById('adminContent');
-
+  
       if (!user) {
         noAccessMessage.style.display = 'block';
         adminContent.style.display = 'none';
-        noAccessMessage.innerHTML = '<p style="color: #b91c1c; font-size: 1.2rem;">⚠ Вы не авторизованы.</p><p>Войдите в систему для доступа к управлению.</p>';
         return;
       }
-
-      // Проверяем права: admin или zamdirektora
-      if (user.role !== 'admin' && user.role !== 'zamdirektora') {
+  
+      if (user.role !== 'admin' && user.role !== 'gendirector') {
         noAccessMessage.style.display = 'block';
         adminContent.style.display = 'none';
-        noAccessMessage.innerHTML = `<p style="color: #b91c1c; font-size: 1.2rem;">⚠ Доступ запрещён.</p><p>Ваша должность: ${ROLE_NAMES[user.role] || 'Неизвестно'}. Только администратор или заместитель директора могут управлять персоналом.</p>`;
         return;
       }
-
-      // Доступ разрешён
+  
       noAccessMessage.style.display = 'none';
       adminContent.style.display = 'block';
       
-      // Заполняем список доступных ролей для создания
       populateRoleSelect(user.role);
+      loadEmployeesList();
       
-      // Загружаем список сотрудников
-      loadEmployeesList(user.role);
-      
-      // Привязываем кнопку создания
       document.getElementById('createEmployeeBtn').addEventListener('click', function() {
-        createEmployee(user);
+        createEmployee();
       });
     }
-
+  
     function populateRoleSelect(currentUserRole) {
       const roleSelect = document.getElementById('role');
       const creatableRoles = getCreatableRoles(currentUserRole);
@@ -154,89 +144,83 @@
         roleSelect.appendChild(option);
       });
     }
-
-    function createEmployee(currentUser) {
+  
+    async function createEmployee() {
       const fullName = document.getElementById('fullName').value.trim();
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value.trim();
       const role = document.getElementById('role').value;
       const formMessage = document.getElementById('formMessage');
-
-      // Валидация
+  
       if (!fullName || !username || !password || !role) {
         formMessage.innerHTML = '<div class="error-message">❌ Заполните все поля</div>';
         return;
       }
-
+  
       if (password.length < 4) {
         formMessage.innerHTML = '<div class="error-message">❌ Пароль должен быть не менее 4 символов</div>';
         return;
       }
-
-      // Проверка прав на создание этой роли
+  
+      const currentUser = getCurrentUser();
       if (!canCreateRole(currentUser.role, role)) {
         formMessage.innerHTML = '<div class="error-message">❌ У вас нет прав на создание этой должности</div>';
         return;
       }
-
-      // Проверка уникальности логина
-      const users = JSON.parse(localStorage.getItem('atp_users') || '[]');
+  
+      // Firebase: проверка уникальности логина
+      const snapshot = await database.ref('users').once('value');
+      const users = snapshot.val() || [];
+      
       if (users.find(u => u.username === username)) {
         formMessage.innerHTML = '<div class="error-message">❌ Сотрудник с таким логином уже существует</div>';
         return;
       }
-
-      // Создаём сотрудника
+  
+      // Firebase: создаём сотрудника
       const newEmployee = {
-        username: username,
-        password: password,
-        name: fullName,
-        role: role,
-        createdAt: new Date().toLocaleString('ru-RU')
+        username, password, name: fullName, role,
+        createdAt: getMoscowDateString()
       };
-
+  
       users.push(newEmployee);
-      localStorage.setItem('atp_users', JSON.stringify(users));
-
-      console.log('Создан сотрудник:', newEmployee);
-
-      // Очищаем форму
+      await database.ref('users').set(users);
+  
       document.getElementById('fullName').value = '';
       document.getElementById('username').value = '';
       document.getElementById('password').value = '';
       document.getElementById('role').value = '';
-
+  
       formMessage.innerHTML = '<div class="success-message">✅ Сотрудник успешно создан!</div>';
-      
-      // Обновляем список
-      loadEmployeesList(currentUser.role);
+      loadEmployeesList();
     }
-
-    function loadEmployeesList(currentUserRole) {
-      const users = JSON.parse(localStorage.getItem('atp_users') || '[]');
+  
+    async function loadEmployeesList() {
+      const snapshot = await database.ref('users').once('value');
+      const users = snapshot.val() || [];
       const tbody = document.getElementById('employeesTableBody');
+      const currentUser = getCurrentUser();
       
-      // Показываем всех кроме admin (если текущий не admin)
       let employees;
-      if (currentUserRole === 'admin') {
-        employees = users.filter(u => u.role !== 'admin'); // Админ видит всех кроме себя
+      if (currentUser.role === 'admin') {
+        employees = users.filter(u => u.role !== 'admin');
       } else {
-        // Зам видит только тех, кого может создать + равен себе
-        const creatableRoles = ROLE_HIERARCHY[currentUserRole] || [];
-        employees = users.filter(u => creatableRoles.includes(u.role) || u.role === currentUserRole);
+        const creatableRoles = ROLE_HIERARCHY[currentUser.role] || [];
+        employees = users.filter(u => creatableRoles.includes(u.role) || u.role === currentUser.role);
       }
-
+  
       if (employees.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Нет созданных сотрудников</td></tr>';
         return;
       }
-
+  
       tbody.innerHTML = employees.map(function(emp) {
         return `
           <tr>
             <td>${emp.name}</td>
             <td>${emp.username}</td>
             <td>${ROLE_NAMES[emp.role] || emp.role}</td>
+            <td>${emp.createdAt || 'Не указана'}</td>
             <td>
               <button class="btn-danger" onclick="deleteEmployee('${emp.username}')">Удалить</button>
             </td>
@@ -244,39 +228,30 @@
         `;
       }).join('');
     }
-
-    // Глобальная функция для удаления
-    window.deleteEmployee = function(username) {
+  
+    window.deleteEmployee = async function(username) {
       const currentUser = getCurrentUser();
-      const users = JSON.parse(localStorage.getItem('atp_users') || '[]');
+      const snapshot = await database.ref('users').once('value');
+      const users = snapshot.val() || [];
       const targetUser = users.find(u => u.username === username);
       
       if (!targetUser) return;
       
-      // Проверяем, можно ли удалить этого пользователя
       if (!canCreateRole(currentUser.role, targetUser.role) && currentUser.role !== targetUser.role) {
         alert('❌ У вас нет прав на удаление этого сотрудника.');
         return;
       }
       
-      // Нельзя удалить самого себя
       if (currentUser.username === username) {
         alert('❌ Вы не можете удалить свой аккаунт.');
         return;
       }
       
-      if (!confirm(`Вы уверены, что хотите удалить сотрудника ${targetUser.name} (${ROLE_NAMES[targetUser.role]})?`)) return;
-
-      const updatedUsers = users.filter(function(u) {
-        return u.username !== username;
-      });
-      localStorage.setItem('atp_users', JSON.stringify(updatedUsers));
-
-      // Снимаем с линии, если был на ней
-      removeFromLine(username);
-
-      // Обновляем таблицу
-      loadEmployeesList(currentUser.role);
+      if (!confirm(`Вы уверены, что хотите удалить сотрудника ${targetUser.name}?`)) return;
+  
+      const updatedUsers = users.filter(u => u.username !== username);
+      await database.ref('users').set(updatedUsers);
+      loadEmployeesList();
     };
   </script>
 </body>
