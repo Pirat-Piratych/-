@@ -342,7 +342,7 @@ async function sendStatusToVK(username, name, status, afkReason = '') {
     case STAFF_STATUSES.ONLINE:
       statusEmoji = '🟢'; statusText = 'ВЫШЕЛ НА ЛИНИЮ'; break;
     case STAFF_STATUSES.AFK:
-      statusEmoji = '🟡'; statusText = `УШЁЛ НА АФК (${afkReason})`; break;
+      statusEmoji = '🟡'; statusText = `УШЁЛ В АФК (${afkReason})`; break;
     case STAFF_STATUSES.OFFLINE:
       statusEmoji = '🔴'; statusText = 'УШЁЛ С ЛИНИИ'; break;
   }
