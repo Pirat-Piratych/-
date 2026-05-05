@@ -369,3 +369,24 @@ tr:last-child td {
   border-radius: 12px;
   margin-bottom: 1rem;
 }
+/* Адаптивность таблиц на мобильных */
+@media (max-width: 768px) {
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  th, td {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+  }
+
+  .page {
+    padding: 1rem;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+  }
+}
