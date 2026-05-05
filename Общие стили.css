@@ -399,3 +399,62 @@ tr:last-child td {
     font-size: 1.4rem;
   }
 }
+/* Стили для таблицы зарплат */
+.page table {
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 2px solid #2563eb;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.1);
+}
+
+.page th {
+  background: linear-gradient(135deg, #0f2b5c, #1e40af);
+  color: white;
+  font-weight: 600;
+  padding: 1rem 1.2rem;
+  text-align: center;
+  letter-spacing: 0.3px;
+}
+
+.page td {
+  text-align: center;
+  padding: 0.9rem 1.2rem;
+  border-right: 1px solid #e2e8f0;
+}
+
+.page td:last-child {
+  border-right: none;
+}
+
+.page tbody tr {
+  transition: background 0.2s;
+}
+
+.page tbody tr:hover {
+  background: #eef2ff;
+}
+
+.page tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.page tbody tr:nth-child(even):hover {
+  background: #eef2ff;
+}
+
+.page tbody td:first-child {
+  text-align: left;
+  font-weight: 500;
+}
+
+.page tbody td:nth-child(2) {
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.page tbody td:nth-child(3) {
+  color: #d97706;
+  font-weight: 600;
+}
