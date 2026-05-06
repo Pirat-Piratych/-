@@ -37,7 +37,12 @@ async function initLinePage() {
     await loadStaffTable();
   });
 
-  document.getElementById('btnAFK')?.addEventListener('click', () => {
+  document.getElementById('btnAFK')?.addEventListener('click', async () => {
+    const currentStatus = await getStaffStatus(user.username);
+    if (currentStatus !== STAFF_STATUSES.ONLINE) {
+      alert('❌ Вы не на линии. Сначала нажмите «Вышел на линию».');
+      return;
+    }
     afkReasonModal.style.display = 'flex';
   });
 
@@ -64,11 +69,21 @@ async function initLinePage() {
   });
 
   window.deleteStaffFromTable = async function(username) {
-    if (!confirm(`Удалить запись о сотруднике "${username}" из таблицы статусов?`)) return;
+    const staffList = await getStaffWithStatuses();
+    const targetStaff = staffList.find(s => s.username === username);
     
-    let staffList = await getStaffWithStatuses();
-    staffList = staffList.filter(s => s.username !== username);
-    await saveStaffWithStatuses(staffList);
+    if (!targetStaff) return;
+    
+    // Проверяем: удалить можно только администратора
+    if (targetStaff.role !== 'admin') {
+      alert('❌ Удалять можно только записи администратора.');
+      return;
+    }
+    
+    if (!confirm(`Удалить запись о сотруднике "${targetStaff.name}" из таблицы статусов?`)) return;
+    
+    const updatedList = staffList.filter(s => s.username !== username);
+    await saveStaffWithStatuses(updatedList);
     
     await updateAllStats();
     await loadStaffTable();
@@ -91,13 +106,16 @@ async function initLinePage() {
     const onlineCount = staffList.filter(s => s.status === STAFF_STATUSES.ONLINE).length;
     const afkCount = staffList.filter(s => s.status === STAFF_STATUSES.AFK).length;
     
+    // Получаем всех пользователей из Firebase и исключаем админа
+    const snapshot = await database.ref('users').once('value');
+    const allUsers = (snapshot.val() || []).filter(u => u.role !== 'admin');
+    
     if (onlineCountSpan) onlineCountSpan.textContent = onlineCount;
     if (afkCountSpan) afkCountSpan.textContent = afkCount;
-    if (totalCountSpan) totalCountSpan.textContent = staffList.length;
+    if (totalCountSpan) totalCountSpan.textContent = allUsers.length;
     
     const currentStatus = await getStaffStatus(user.username);
     const activeTime = await getActiveTime(user.username);
-    
     if (currentStatusSpan) {
       switch(currentStatus) {
         case STAFF_STATUSES.ONLINE:
@@ -112,6 +130,11 @@ async function initLinePage() {
           break;
       }
     }
+    
+    if (currentActiveSpan) {
+      currentActiveSpan.textContent = activeTime;
+    }
+  
     
     if (currentActiveSpan) {
       currentActiveSpan.textContent = activeTime;
@@ -131,6 +154,19 @@ async function initLinePage() {
         btn.style.cursor = 'pointer';
       }
     });
+
+    if (currentStatus === STAFF_STATUSES.ONLINE) {
+      // На линии: нельзя "Вышел на линию"
+      if (btnOnline) { btnOnline.disabled = true; btnOnline.style.opacity = '0.6'; btnOnline.style.cursor = 'not-allowed'; }
+    } else if (currentStatus === STAFF_STATUSES.AFK) {
+      // В АФК: нельзя только "АФК"
+      if (btnAFK) { btnAFK.disabled = true; btnAFK.style.opacity = '0.6'; btnAFK.style.cursor = 'not-allowed'; }
+    } else if (currentStatus === STAFF_STATUSES.OFFLINE) {
+      // Не на линии: нельзя "АФК" и "Ушёл с линии"
+      if (btnAFK) { btnAFK.disabled = true; btnAFK.style.opacity = '0.6'; btnAFK.style.cursor = 'not-allowed'; }
+      if (btnOffline) { btnOffline.disabled = true; btnOffline.style.opacity = '0.6'; btnOffline.style.cursor = 'not-allowed'; }
+    }
+  
 
     switch(currentStatus) {
       case STAFF_STATUSES.ONLINE:
@@ -166,9 +202,9 @@ async function initLinePage() {
         const activeTime = await getActiveTime(staff.username);
         const exitDate = staff.exitDate || '—';
         
-        const deleteButton = (currentUserRole === 'admin') 
-          ? `<button class="btn-danger" onclick="deleteStaffFromTable('${staff.username}')" title="Удалить запись">❌</button>`
-          : '';
+        const deleteButton = (currentUserRole === 'admin' && staff.role === 'admin')
+  ? `<button class="btn-danger" onclick="deleteStaffFromTable('${staff.username}')" title="Удалить запись">❌</button>`
+  : '';
         
         rows.push(`
           <tr style="${rowStyle}">
@@ -198,7 +234,7 @@ async function initLinePage() {
         onlineList.innerHTML = '<em style="color: #94a3b8;">Никого нет</em>';
       } else {
         onlineList.innerHTML = onlineStaff.map(s => 
-          `<div class="staff-chip">${s.name} <span style="font-size:0.8rem;">(${ROLE_NAMES[s.role] || s.role})</span></div>`
+          `<div class="staff-chip">${s.name}</div>`
         ).join('');
       }
     }
