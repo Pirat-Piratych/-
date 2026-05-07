@@ -248,7 +248,7 @@
         return;
       }
 
-      if (user.role !== 'admin' && user.role !== 'gendirector') {
+      if (user.role !== 'admin' && user.role !== 'gendirector' && user.role !== 'zamdirektora') {
         noAccessMessage.style.display = 'block';
         adminContent.style.display = 'none';
         return;

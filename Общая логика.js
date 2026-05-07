@@ -32,7 +32,7 @@ database.ref('users').once('value', (snapshot) => {
 const ROLE_HIERARCHY = {
   'admin': ['gendirector', 'zamdirektora', 'brigadir', 'driver'],
   'gendirector': ['zamdirektora', 'brigadir', 'driver'],
-  'zamdirektora': ['brigadir', 'driver'],
+  'zamdirektora': ['zamdirektora', 'brigadir', 'driver'],
   'brigadir': [],
   'driver': []
 };
@@ -142,7 +142,7 @@ function updateAdminMenuVisibility() {
   const adminLink = document.getElementById('adminMenuLink');
   if (!adminLink) return;
   const user = getCurrentUser();
-  if (user && (user.role === 'admin' || user.role === 'gendirector')) {
+  if (user && (user.role === 'admin' || user.role === 'gendirector' || user.role === 'zamdirektora')) {
     adminLink.style.display = 'inline';
   } else {
     adminLink.style.display = 'none';
