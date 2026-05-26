@@ -378,38 +378,7 @@ tr:last-child td {
   border-radius: 12px;
   margin-bottom: 1rem;
 }
-/* Адаптивность таблиц на мобильных */
-@media (max-width: 768px) {
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .nav-links {
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-  
-  .table-wrapper {
-    overflow-x: auto;
-  }
-  
-  table {
-    min-width: 600px;
-    font-size: 0.85rem;
-  }
-  
-  th, td {
-    padding: 0.6rem 0.8rem;
-  }
 
-  .page {
-    padding: 1rem;
-  }
-
-  h2 {
-    font-size: 1.4rem;
-  }
-}
 /* Скруглённое выделение строк */
 #employeesTable tbody tr.selected td:first-child {
   border-top-left-radius: 0;
