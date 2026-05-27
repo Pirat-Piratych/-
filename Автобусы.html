@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ООО «МирнГорТранс» • Автобусы</title>
+  <link rel="stylesheet" href="Общие стили.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Шапка -->
+    <header class="header">
+      <div class="logo-area">
+        <div class="logo-icon">
+          <img src="images/Белый логотип МГТ без фона.png" alt="ЧАТП" style="width: 80%; height: auto; border-radius: 14px; object-fit: cover;">
+        </div>
+        <div class="logo-text">ООО<span> «МирнГорТранс»</span></div>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html">О нас</a>
+        <a href="Заработные платы.html" class="active">Зарплаты</a>
+        <a href="Маршруты.html">Маршруты</a>
+        <a href="Выходы на маршруты.html" id="lineMenuLink" style="display: none;">Выход на маршруты</a>
+        <a href="admin.html" id="adminMenuLink" style="display: none;">Управление</a>
+        <a href="Автобусы.html">Автобусы</a>
+        <span id="authArea"></span>
+      </nav>
+    </header>
+
+    <!-- Основной контент -->
+    <main>
+      <section class="page">
+        <h2>💰 Автобусы</h2>
+        <div class="table-wrapper">
+
+          <table class="salary-table">
+          <thead>
+            <tr>
+              <th>Автобус</th>
+              <th>Маршрут № м2</th>
+              <th>Маршрут № 24</th>
+              <th>Маршрут № 24к</th>
+              <th>Маршрут № 102</th>
+              <th>Маршрут № с22</th>
+              <th>Маршрут № 408</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Автобус</td>
+              <td>Да</td>
+              <td>Нет</td>
+              <td>+</td>
+              <td>-</td>
+              <td>Крыжик</td>
+              <td>Крестик</td>
+            </tr>
+            <tr>
+              <td>м2 (ночной)</td>
+              <td>11.250₽</td>
+              <td>5.625₽</td>
+              <td>х1.5</td>
+              <td>Нету</td>
+            </tr>
+            <tr>
+              <td>24</td>
+              <td>22.500₽</td>
+              <td>11.250₽</td>
+              <td>х1.5</td>
+              <td>Нету</td>
+            </tr>
+            <tr>
+              <td>24к</td>
+              <td>11.250₽</td>
+              <td>5.625₽</td>
+              <td>х1.5</td>
+              <td>Нету</td>
+            </tr>
+            <tr>
+              <td>102</td>
+              <td>15.000₽</td>
+              <td>7.500₽</td>
+              <td>х1.5</td>
+              <td>Нету</td>
+            </tr>
+            <td>с22</td>
+            <td>30.000₽</td>
+            <td>15.000₽</td>
+            <td>х1.5</td>
+            <td>15.000₽</td>
+            </tr>
+            <td>408</td>
+            <td>22.500₽</td>
+            <td>11.250₽</td>
+            <td>х1.5</td>
+            <td>11.250₽</td>
+          </tbody>
+        </table>
+        </div>
+        <p style="margin-top: 1rem; color: #4b5563;">ГАЗ-322132 [новый окрас] — МК (доступные маршруты: №24к, сезонные) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">КАвЗ-3270 / КАвЗ-685М [старый окрас] — МК (НЕДОСТУПНЫ, в ЧАТП не принимаются) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">ПАЗ-32053 [старый окрас] — МК (доступные маршруты: №24к, сезонные) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">ПАЗ-32054 (бензин / дизель) [старый окрас] — СК (доступны все маршруты, кроме №24к) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">Богдан А092 [новый окрас] — СК (доступны все маршруты, кроме №24к) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">ГАЗ-A64R42 Next «Ситилайн» [новый окрас] — МК (доступные маршруты: №24к, сезонные) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">ПАЗ-4234 [старый окрас] — СК (доступны все маршруты, кроме №24к) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">Богдан А09302 [новый окрас] — СК (доступны все маршруты, кроме №24к) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">Богдан А09304 «Атаман» [новый окрас] — СК (доступны все маршруты, кроме №24к) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">ПАЗ-32053 рестайлинг [старый окрас] — МК (доступные маршруты: №24к, сезонные) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">ПАЗ-32054 рестайлинг [старый окрас] — СК (доступны все маршруты, кроме №24к) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">Mercedes-Benz Sprinter Classic 411 AD CDI (обе вариации) [новый окрас] — МК (доступные маршруты: №24к, сезонные) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">ПАЗ-320405-04 «Vector Next» [новый окрас] — СК (доступны все маршруты, кроме №24к) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">ПАЗ-672М [старый окрас] — СК (доступны все маршруты, кроме №24к) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">ПАЗ-320414-05 «Vector» [новый окрас] — СК (доступны все маршруты, кроме №24к) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">ПАЗ-4230 «Аврора» [новый окрас] — СК (доступны все маршруты, кроме №24к) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">ЛАЗ-695Н [старый окрас] — СК (доступны все маршруты, кроме №24к) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">ЛиАЗ-5256.00 (обе вариации) [старый окрас] — БК (доступны все маршруты, кроме №24к и сезонных) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">ЛАЗ-4207 [старый окрас] — ОБК [межгород] (доступные маршруты: №102) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">ЛиАЗ 5256.00-11 [старый окрас] — ОБК [межгород] (доступные маршруты: №102) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">КАвЗ-4238 «Аврора» [новый окрас] — ОБК [межгород] (доступные маршруты: №102) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">ЛАЗ-5207 [старый окрас] — ОБК [межгород] (доступные маршруты: №102) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">ЛиАЗ-5256.40 [старый окрас] — БК (доступны все маршруты, кроме №24к и сезонных) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">Ikarus-260.50 (обе вариации) [старый окрас] — БК (доступны все маршруты, кроме №24к и сезонных) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">Scania OmniLink CK95UB 4x2 LB (обе вариации) [новый окрас] — БК (доступны все маршруты, кроме №24к и сезонных) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">ЛиАЗ-4292.60 [новый окрас] — СК (доступны все маршруты, кроме №24к) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">ЛАЗ-697Р «Турист» [старый окрас] — ОБК [межгород] (доступные маршруты: №102) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">Ikarus-256.54 [новый окрас] — ОБК [межгород] (доступные маршруты: №102) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">ЛиАЗ-5292.22 (2-2-2) [старый/новый окрас + САС] — БК (доступны все маршруты, кроме №24к и сезонных) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">МАЗ-203.069 [новый окрас] — БК (доступны все маршруты, кроме №24к и сезонных) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">Ikarus-250.59 [новый окрас] — ОБК [межгород] (доступные маршруты: №102) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">ЛАЗ-699Р «Турист» [старый окрас] — ОБК [межгород] (доступные маршруты: №102) </p>
+        <p style="margin-top: 1rem; color: #4b5563;">ЛиАЗ-677 (все вариации) [старый окрас] — БК (доступны все маршруты, кроме №24к и сезонных). •  • </p>
+      </section>
+    </main>
+  </div>
+
+  <script src="Общая логика.js"></script>
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+    initAuth();
+    updateLineMenuVisibility();
+    updateAdminMenuVisibility();
+});
+  </script>
+</body>
+</html>
