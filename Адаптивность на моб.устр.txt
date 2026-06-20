@@ -1,0 +1,74 @@
+/* Адаптивность таблиц на мобильных */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .nav-links {
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .table-wrapper {
+    overflow-x: auto;
+  }
+  
+  table {
+    min-width: 600px;
+    font-size: 0.85rem;
+  }
+  
+  th, td {
+    padding: 0.6rem 0.8rem;
+  }
+
+  .page {
+    padding: 1rem;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+  }
+}
+
+
+/* Стиль таблицы зарплат */
+.salary-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.salary-table thead th {
+  background: #0f2b5c;
+  color: white;
+  font-weight: 600;
+  padding: 0.9rem 1rem;
+  text-align: left;
+}
+
+.salary-table thead th:first-child {
+  border-radius: 16px 0 0 0;
+}
+
+.salary-table thead th:last-child {
+  border-radius: 0 16px 0 0;
+}
+
+.salary-table tbody td {
+  border-left: 3px solid #0f2b5c;
+  border-right: 3px solid #0f2b5c;
+  border-bottom: 3px solid #0f2b5c;
+  padding: 0.9rem 1rem;
+}
+
+.salary-table tbody tr:first-child td {
+  border-top: none;
+}
+
+.salary-table tbody tr:last-child td:first-child {
+  border-radius: 0 0 0 16px;
+}
+
+.salary-table tbody tr:last-child td:last-child {
+  border-radius: 0 0 16px 0;
+}
