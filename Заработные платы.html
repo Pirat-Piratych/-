@@ -6,34 +6,9 @@
   <title>ООО «МирнГорТранс» • Заработные платы</title>
   <link rel="stylesheet" href="Общие стили.css">
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-<script src="https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js"></script>
 </head>
-<!-- Модальное окно авторизации -->
-<div class="auth-overlay" id="authOverlay">
-  <div class="auth-modal">
-    <button class="auth-modal-close" id="authClose">&times;</button>
-    <div class="auth-modal-icon">🔐</div>
-    <h3>Вход в систему</h3>
-    <p class="auth-subtitle">ЧАТП «МирнГорТранс»</p>
-    
-    <div class="form-group">
-      <label for="authUsername">Логин</label>
-      <input type="text" id="authUsername" class="input-user" placeholder="Введите логин" autocomplete="username">
-    </div>
-    
-    <div class="form-group">
-      <label for="authPassword">Пароль</label>
-      <input type="password" id="authPassword" class="input-pass" placeholder="Введите пароль" autocomplete="current-password">
-    </div>
-    
-    <button class="btn-auth-submit" id="authSubmit">Войти</button>
-    <div class="auth-error" id="authError"></div>
-  </div>
-</div>
-<button class="btn-auth-submit" id="authSubmit">Войти</button>
-<button id="vkLoginBtn" style="width:100%; padding:0.8rem; margin-top:0.5rem; background:#0077FF; color:white; border:none; border-radius:14px; font-size:1rem; font-weight:600; cursor:pointer;">🔵 Войти через VK</button>
-<div class="auth-error" id="authError"></div>
 <body>
   <div class="app-container">
     <!-- Шапка -->
@@ -61,101 +36,128 @@
       <section class="page">
         <h2>💰 Заработные платы</h2>
         <div class="table-wrapper">
-
           <table class="salary-table">
-          <thead>
-            <tr>
-              <th>№ маршрута</th>
-              <th>Заработные платы</th>
-              <th>Информатор</th>
-              <th>Видеоотчёт</th>
-              <th>Графики</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>м2 (дневной)</td>
-              <td>15.000₽</td>
-              <td>7.500₽</td>
-              <td>х1.5</td>
-              <td>Нету</td>
-            </tr>
-            <tr>
-              <td>м2 (ночной)</td>
-              <td>11.250₽</td>
-              <td>5.625₽</td>
-              <td>х1.5</td>
-              <td>Нету</td>
-            </tr>
-            <tr>
-              <td>24</td>
-              <td>22.500₽</td>
-              <td>11.250₽</td>
-              <td>х1.5</td>
-              <td>Нету</td>
-            </tr>
-            <tr>
-              <td>24к</td>
-              <td>11.250₽</td>
-              <td>5.625₽</td>
-              <td>х1.5</td>
-              <td>Нету</td>
-            </tr>
-            <tr>
-              <td>102</td>
-              <td>15.000₽</td>
-              <td>7.500₽</td>
-              <td>х1.5</td>
-              <td>Нету</td>
-            </tr>
-            <td>с22</td>
-            <td>30.000₽</td>
-            <td>15.000₽</td>
-            <td>х1.5</td>
-            <td>15.000₽</td>
-            </tr>
-            <td>408</td>
-            <td>22.500₽</td>
-            <td>11.250₽</td>
-            <td>х1.5</td>
-            <td>11.250₽</td>
-          </tbody>
-        </table>
+            <thead>
+              <tr>
+                <th>№ маршрута</th>
+                <th>Заработные платы</th>
+                <th>Информатор</th>
+                <th>Видеоотчёт</th>
+                <th>Графики</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>м2 (дневной)</td>
+                <td>15.000₽</td>
+                <td>7.500₽</td>
+                <td>х1.5</td>
+                <td>Нету</td>
+              </tr>
+              <tr>
+                <td>м2 (ночной)</td>
+                <td>11.250₽</td>
+                <td>5.625₽</td>
+                <td>х1.5</td>
+                <td>Нету</td>
+              </tr>
+              <tr>
+                <td>24</td>
+                <td>22.500₽</td>
+                <td>11.250₽</td>
+                <td>х1.5</td>
+                <td>Нету</td>
+              </tr>
+              <tr>
+                <td>24к</td>
+                <td>11.250₽</td>
+                <td>5.625₽</td>
+                <td>х1.5</td>
+                <td>Нету</td>
+              </tr>
+              <tr>
+                <td>102</td>
+                <td>15.000₽</td>
+                <td>7.500₽</td>
+                <td>х1.5</td>
+                <td>Нету</td>
+              </tr>
+              <tr>
+                <td>с22</td>
+                <td>30.000₽</td>
+                <td>15.000₽</td>
+                <td>х1.5</td>
+                <td>15.000₽</td>
+              </tr>
+              <tr>
+                <td>408</td>
+                <td>22.500₽</td>
+                <td>11.250₽</td>
+                <td>х1.5</td>
+                <td>11.250₽</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <p style="margin-top: 1rem; color: #4b5563;">✔ Выплаты раз в неделю •  • </p>
+        <p style="margin-top: 1rem; color: #4b5563;">✔ Выплаты раз в неделю • • </p>
       </section>
     </main>
   </div>
 
-  <script src="Общая логика.js"></script>
-  <script>
-document.addEventListener('DOMContentLoaded', () => {
-    initAuth();
-    updateLineMenuVisibility();
-    updateAdminMenuVisibility();
-});
-  </script>
-  <!-- Модальное окно уведомлений -->
-<div class="msg-overlay" id="msgOverlay">
-  <div class="msg-box">
-    <div class="msg-icon" id="msgIcon">✅</div>
-    <div class="msg-title" id="msgTitle">Готово</div>
-    <div class="msg-text" id="msgText">Операция выполнена</div>
-    <button class="msg-btn" id="msgBtn">ОК</button>
-  </div>
-</div>
+  <!-- Модальное окно авторизации -->
+  <div class="auth-overlay" id="authOverlay">
+    <div class="auth-modal">
+      <button class="auth-modal-close" id="authClose">&times;</button>
+      <div class="auth-modal-icon">🔐</div>
+      <h3>Вход в систему</h3>
+      <p class="auth-subtitle">ЧАТП «МирнГорТранс»</p>
 
-<!-- Модальное окно подтверждения -->
-<div class="msg-overlay" id="confirmOverlay">
-  <div class="msg-box">
-    <div class="msg-icon">❓</div>
-    <div class="msg-title" id="confirmTitle">Подтверждение</div>
-    <div class="msg-text" id="confirmText">Вы уверены?</div>
-    <div style="display:flex; gap:0.5rem;">
-      <button class="msg-btn" id="confirmNo" style="background:#64748b;">Отмена</button>
-      <button class="msg-btn" id="confirmYes">Да</button>
+      <div class="form-group">
+        <label for="authUsername">Логин</label>
+        <input type="text" id="authUsername" class="input-user" placeholder="Введите логин" autocomplete="username">
+      </div>
+
+      <div class="form-group">
+        <label for="authPassword">Пароль</label>
+        <input type="password" id="authPassword" class="input-pass" placeholder="Введите пароль" autocomplete="current-password">
+      </div>
+
+      <button class="btn-auth-submit" id="authSubmit">Войти</button>
+      <button id="vkLoginBtn" style="width:100%; padding:0.8rem; margin-top:0.5rem; background:#0077FF; color:white; border:none; border-radius:14px; font-size:1rem; font-weight:600; cursor:pointer;">🔵 Войти через VK</button>
+      <div class="auth-error" id="authError"></div>
     </div>
   </div>
-</div>
+
+  <!-- Модальное окно уведомлений -->
+  <div class="msg-overlay" id="msgOverlay">
+    <div class="msg-box">
+      <div class="msg-icon" id="msgIcon">✅</div>
+      <div class="msg-title" id="msgTitle">Готово</div>
+      <div class="msg-text" id="msgText">Операция выполнена</div>
+      <button class="msg-btn" id="msgBtn">ОК</button>
+    </div>
+  </div>
+
+  <!-- Модальное окно подтверждения -->
+  <div class="msg-overlay" id="confirmOverlay">
+    <div class="msg-box">
+      <div class="msg-icon">❓</div>
+      <div class="msg-title" id="confirmTitle">Подтверждение</div>
+      <div class="msg-text" id="confirmText">Вы уверены?</div>
+      <div style="display:flex; gap:0.5rem;">
+        <button class="msg-btn" id="confirmNo" style="background:#64748b;">Отмена</button>
+        <button class="msg-btn" id="confirmYes">Да</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="Общая логика.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initAuth();
+      updateLineMenuVisibility();
+      updateAdminMenuVisibility();
+    });
+  </script>
 </body>
 </html>
