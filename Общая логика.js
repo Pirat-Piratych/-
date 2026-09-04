@@ -228,18 +228,25 @@ function initVKLogin() {
   btn.addEventListener('click', async () => {
     try {
       const VKID = window.VKIDSDK;
+      
       if (!VKID) {
-        showMessage('⚠️', 'Ошибка', 'SDK не загрузился. Обновите страницу.');
+        showMessage('⚠️', 'Ошибка', 'VK ID SDK не загрузился. Отключите блокировщик рекламы и обновите страницу.');
         return;
       }
       
-      VKID.Config.set({
+      VKID.Config.init({
         app: VK_APP_ID,
-        redirectUrl: window.location.href
+        redirectUrl: window.location.origin + window.location.pathname,
+        mode: VKID.ConfigAuthMode.InNewWindow,
+        responseMode: VKID.ConfigResponseMode.Callback,
+        scope: "email"
       });
       
-      const auth = await VKID.Auth.login();
-      const vkId = auth.user.id;
+      const authResult = await VKID.Auth.login();
+      const tokenResult = await VKID.Auth.exchangeCode(authResult.code, authResult.device_id);
+      const userResult = await VKID.Auth.userInfo(tokenResult.access_token);
+      const vkUser = userResult.user;
+      const vkId = vkUser.user_id || tokenResult.user_id;
       
       const snapshot = await database.ref('users').once('value');
       const users = snapshot.val() || [];
@@ -249,11 +256,11 @@ function initVKLogin() {
         setCurrentUser({ username: found.username, name: found.name, role: found.role });
         showMessage('✅', 'Добро пожаловать!', `${found.name}, вход выполнен.`, () => location.reload());
       } else {
-        showMessage('❌', 'Ошибка', 'Ваш VK не привязан к аккаунту.');
+        showMessage('❌', 'Ошибка', 'Ваш VK не привязан к аккаунту. Обратитесь к администратору.');
       }
     } catch (e) {
       console.error('Ошибка VK ID:', e);
-      showMessage('❌', 'Ошибка', 'Не удалось войти через VK: ' + e.message);
+      showMessage('❌', 'Ошибка', e.error_description || e.message || 'Не удалось войти через VK.');
     }
   });
 }
