@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Вход через VK</title>
+
+  <!-- Фиксированная версия официального VK ID SDK -->
+  <script src="https://unpkg.com/@vkid/sdk@2.6.1/dist-sdk/umd/index.js"></script>
+
+  <style>
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      font-family: Arial, sans-serif;
+      background: #f2f3f5;
+    }
+
+    .auth {
+      width: min(360px, calc(100% - 40px));
+      padding: 30px;
+      text-align: center;
+      border-radius: 18px;
+      background: white;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    #vkLoginBtn {
+      width: 100%;
+      padding: 14px 20px;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      border: 0;
+      border-radius: 10px;
+      background: #0077ff;
+      cursor: pointer;
+    }
+
+    #vkLoginBtn:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    #result {
+      margin-top: 18px;
+      line-height: 1.5;
+    }
+
+    .error {
+      color: #c62828;
+    }
+
+    .success {
+      color: #168436;
+    }
+
+    .avatar {
+      width: 90px;
+      height: 90px;
+      margin-top: 12px;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="auth">
+    <button id="vkLoginBtn" type="button">
+      Войти через VK
+    </button>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    "use strict";
+
+    const VK_APP_ID = 54752829;
+    const VK_REDIRECT_URL =
+      "https://pirat-piratych.github.io/-/";
+
+    const button = document.getElementById("vkLoginBtn");
+    const result = document.getElementById("result");
+
+    let vkInitialized = false;
+
+    function showError(message) {
+      result.className = "error";
+      result.textContent = message;
+    }
+
+    function showUser(user, vkId) {
+      const firstName = user.first_name || "";
+      const lastName = user.last_name || "";
+      const fullName =
+        `${firstName} ${lastName}`.trim() || "Пользователь VK";
+
+      result.className = "success";
+      result.replaceChildren();
+
+      const title = document.createElement("p");
+      title.textContent = "Вход выполнен успешно!";
+
+      const name = document.createElement("p");
+      name.textContent = fullName;
+
+      const id = document.createElement("p");
+      id.textContent = `VK ID: ${vkId}`;
+
+      result.append(title, name, id);
+
+      if (user.avatar) {
+        const avatar = document.createElement("img");
+        avatar.src = user.avatar;
+        avatar.alt = "Аватар VK";
+        avatar.className = "avatar";
+        result.appendChild(avatar);
+      }
+    }
+
+    function getVKID() {
+      const VKID = window.VKIDSDK;
+
+      if (!VKID) {
+        throw new Error(
+          "VK ID SDK не загрузился. Отключите блокировщик рекламы и обновите страницу."
+        );
+      }
+
+      if (!vkInitialized) {
+        VKID.Config.init({
+          app: VK_APP_ID,
+          redirectUrl: VK_REDIRECT_URL,
+          mode: VKID.ConfigAuthMode.InNewWindow,
+          responseMode: VKID.ConfigResponseMode.Callback,
+          scope: "email"
+        });
+
+        vkInitialized = true;
+      }
+
+      return VKID;
+    }
+
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+      button.textContent = "Открываем VK...";
+      result.textContent = "";
+      result.className = "";
+
+      try {
+        const VKID = getVKID();
+
+        // Получаем одноразовый код VK.
+        const authResponse = await VKID.Auth.login();
+
+        if (!authResponse?.code || !authResponse?.device_id) {
+          throw new Error("VK не вернул код авторизации.");
+        }
+
+        // Обмениваем код на токен.
+        const tokenResponse = await VKID.Auth.exchangeCode(
+          authResponse.code,
+          authResponse.device_id
+        );
+
+        if (!tokenResponse?.access_token) {
+          throw new Error("VK не вернул токен доступа.");
+        }
+
+        // Получаем пользователя.
+        const userResponse = await VKID.Auth.userInfo(
+            
+tokenResponse.access_token
+        );
+
+        const user = userResponse?.user;
+
+        if (!user) {
+          throw new Error("Не удалось получить данные пользователя.");
+        }
+
+        const vkId =
+          user.user_id ||
+          tokenResponse.user_id;
+
+        showUser(user, vkId);
+
+        console.log("Данные пользователя VK:", user);
+      } catch (error) {
+        console.error("Ошибка VK ID:", error);
+
+        showError(
+          error?.error_description ||
+          error?.message ||
+          "Ошибка авторизации через VK."
+        );
+      } finally {
+        button.disabled = false;
+        button.textContent = "Войти через VK";
+      }
+    });
+  </script>
+</body>
+</html>

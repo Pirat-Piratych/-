@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="Общие стили.css">
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://unpkg.com/@vkid/sdk@2.6.1/dist-sdk/umd/index.js"></script>
   <style>
     .quick-btn {
       padding: 0.4rem 0.8rem; border: none; border-radius: 8px;
@@ -17,7 +18,6 @@
     .quick-afk { background: #d97706; }
     .quick-offline { background: #dc2626; }
   </style>
-<script src="https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js"></script>
 </head>
 <body>
   <div class="app-container">
@@ -142,8 +142,31 @@
       <div class="form-group"><label for="authUsername">Логин</label><input type="text" id="authUsername" class="input-user" placeholder="Введите логин"></div>
       <div class="form-group"><label for="authPassword">Пароль</label><input type="password" id="authPassword" class="input-pass" placeholder="Введите пароль"></div>
       <button class="btn-auth-submit" id="authSubmit">Войти</button>
-<button id="vkLoginBtn" style="width:100%; padding:0.8rem; margin-top:0.5rem; background:#0077FF; color:white; border:none; border-radius:14px; font-size:1rem; font-weight:600; cursor:pointer;">🔵 Войти через VK</button>
-<div class="auth-error" id="authError"></div>
+      <button id="vkLoginBtn" style="width:100%; padding:0.8rem; margin-top:0.5rem; background:#0077FF; color:white; border:none; border-radius:14px; font-size:1rem; font-weight:600; cursor:pointer;">🔵 Войти через VK</button>
+      <div class="auth-error" id="authError"></div>
+    </div>
+  </div>
+
+  <!-- Модальное окно уведомлений -->
+  <div class="msg-overlay" id="msgOverlay">
+    <div class="msg-box">
+      <div class="msg-icon" id="msgIcon">✅</div>
+      <div class="msg-title" id="msgTitle">Готово</div>
+      <div class="msg-text" id="msgText">Операция выполнена</div>
+      <button class="msg-btn" id="msgBtn">ОК</button>
+    </div>
+  </div>
+
+  <!-- Модальное окно подтверждения -->
+  <div class="msg-overlay" id="confirmOverlay">
+    <div class="msg-box">
+      <div class="msg-icon">❓</div>
+      <div class="msg-title" id="confirmTitle">Подтверждение</div>
+      <div class="msg-text" id="confirmText">Вы уверены?</div>
+      <div style="display:flex; gap:0.5rem;">
+        <button class="msg-btn" id="confirmNo" style="background:#64748b;">Отмена</button>
+        <button class="msg-btn" id="confirmYes">Да</button>
+      </div>
     </div>
   </div>
 
@@ -157,27 +180,26 @@
     });
 
     async function initDispatcher() {
-  const user = getCurrentUser();
-  if (!user) {
-    document.getElementById('notAuthMessage').style.display = 'block';
-    document.getElementById('dispatcherContent').style.display = 'none';
-    return;
-  }
-  
-  document.getElementById('notAuthMessage').style.display = 'none';
-  document.getElementById('dispatcherContent').style.display = 'block';
-  
-  // Инициализация кастомных селектов (после return)
-  initCustomSelect('monthTrigger', 'monthOptions', 'monthText', 'monthFilter', loadTable);
-  initCustomSelect('yearTrigger', 'yearOptions', 'yearText', 'yearFilter', loadTable);
-  
-  populateYearFilter();
-  await populateFilter();
-  await loadTable();
+      const user = getCurrentUser();
+      if (!user) {
+        document.getElementById('notAuthMessage').style.display = 'block';
+        document.getElementById('dispatcherContent').style.display = 'none';
+        return;
+      }
+      
+      document.getElementById('notAuthMessage').style.display = 'none';
+      document.getElementById('dispatcherContent').style.display = 'block';
+      
+      initCustomSelect('monthTrigger', 'monthOptions', 'monthText', 'monthFilter', loadTable);
+      initCustomSelect('yearTrigger', 'yearOptions', 'yearText', 'yearFilter', loadTable);
+      
+      populateYearFilter();
+      await populateFilter();
+      await loadTable();
 
       document.getElementById('btnOnline').addEventListener('click', async () => {
         const filter = document.getElementById('dispFilter');
-        if (filter.value === 'all') { alert('Выберите сотрудника из списка'); return; }
+        if (filter.value === 'all') { showMessage('ℹ️', 'Уведомление', 'Выберите сотрудника из списка'); return; }
         const snap = await database.ref('users').once('value');
         const usr = (snap.val() || []).find(u => u.username === filter.value);
         if (usr) { await setStaffStatus(usr.username, usr.name, 'online'); await loadTable(); }
@@ -185,7 +207,7 @@
 
       document.getElementById('btnAFK').addEventListener('click', async () => {
         const filter = document.getElementById('dispFilter');
-        if (filter.value === 'all') { alert('Выберите сотрудника из списка'); return; }
+        if (filter.value === 'all') { showMessage('ℹ️', 'Уведомление', 'Выберите сотрудника из списка'); return; }
         const snap = await database.ref('users').once('value');
         const usr = (snap.val() || []).find(u => u.username === filter.value);
         if (usr) { await setStaffStatus(usr.username, usr.name, 'afk', 'Смена диспетчером'); await loadTable(); }
@@ -193,18 +215,19 @@
 
       document.getElementById('btnOffline').addEventListener('click', async () => {
         const filter = document.getElementById('dispFilter');
-        if (filter.value === 'all') { alert('Выберите сотрудника из списка'); return; }
+        if (filter.value === 'all') { showMessage('ℹ️', 'Уведомление', 'Выберите сотрудника из списка'); return; }
         const snap = await database.ref('users').once('value');
         const usr = (snap.val() || []).find(u => u.username === filter.value);
         if (usr) { await setStaffStatus(usr.username, usr.name, 'offline'); await loadTable(); }
       });
 
-      document.getElementById('deleteAdminBtn').addEventListener('click', async () => {
-        if (!confirm('Удалить все записи администратора?')) return;
-        const staffList = await getStaffWithStatuses();
-        const updated = staffList.filter(s => s.role !== 'admin');
-        await saveStaffWithStatuses(updated);
-        await loadTable();
+      document.getElementById('deleteAdminBtn').addEventListener('click', () => {
+        showConfirm('Подтверждение', 'Удалить все записи администратора?', async () => {
+          const staffList = await getStaffWithStatuses();
+          const updated = staffList.filter(s => s.role !== 'admin');
+          await saveStaffWithStatuses(updated);
+          await loadTable();
+        });
       });
 
       document.getElementById('monthFilter').addEventListener('change', loadTable);
@@ -215,9 +238,9 @@
       const options = document.getElementById('yearOptions');
       const currentYear = new Date().getFullYear();
       for (let y = currentYear; y >= currentYear - 5; y--) {
-      options.innerHTML += `<div class="custom-select-option" data-value="${y}">${y}</div>`;
+        options.innerHTML += `<div class="custom-select-option" data-value="${y}">${y}</div>`;
+      }
     }
-}
 
     async function populateFilter() {
       const trigger = document.getElementById('filterTrigger');
@@ -265,22 +288,18 @@
       const staffList = await getStaffWithStatuses();
       let filtered = staffList;
 
-      // Фильтр по сотруднику
       if (filter && filter.value !== 'all') {
         filtered = filtered.filter(s => s.username === filter.value);
       }
 
-      // Фильтр по месяцу
       if (monthFilter !== 'all') {
         filtered = filtered.filter(s => s.exitDate && s.exitDate.split('.')[1] === monthFilter);
       }
 
-      // Фильтр по году
       if (yearFilter !== 'all') {
         filtered = filtered.filter(s => s.exitDate && s.exitDate.split('.')[2] === yearFilter);
       }
 
-      // Проверка записей админа
       const hasAdmin = staffList.some(s => s.role === 'admin');
       const delBtn = document.getElementById('deleteAdminBtn');
       if (delBtn) {
@@ -323,55 +342,33 @@
     }
 
     function initCustomSelect(triggerId, optionsId, textId, hiddenId, onChange) {
-  const trigger = document.getElementById(triggerId);
-  const options = document.getElementById(optionsId);
-  const text = document.getElementById(textId);
-  const hidden = document.getElementById(hiddenId);
-  if (!trigger || !options) return;
+      const trigger = document.getElementById(triggerId);
+      const options = document.getElementById(optionsId);
+      const text = document.getElementById(textId);
+      const hidden = document.getElementById(hiddenId);
+      if (!trigger || !options) return;
 
-  trigger.onclick = () => { trigger.classList.toggle('active'); options.classList.toggle('open'); };
+      trigger.onclick = () => { trigger.classList.toggle('active'); options.classList.toggle('open'); };
 
-  options.querySelectorAll('.custom-select-option').forEach(opt => {
-    opt.onclick = () => {
-      text.textContent = opt.textContent;
-      hidden.value = opt.dataset.value;
-      options.querySelectorAll('.custom-select-option').forEach(o => o.classList.remove('selected'));
-      opt.classList.add('selected');
-      trigger.classList.remove('active');
-      options.classList.remove('open');
-      if (onChange) onChange();
-    };
-  });
+      options.querySelectorAll('.custom-select-option').forEach(opt => {
+        opt.onclick = () => {
+          text.textContent = opt.textContent;
+          hidden.value = opt.dataset.value;
+          options.querySelectorAll('.custom-select-option').forEach(o => o.classList.remove('selected'));
+          opt.classList.add('selected');
+          trigger.classList.remove('active');
+          options.classList.remove('open');
+          if (onChange) onChange();
+        };
+      });
 
-  document.addEventListener('click', (e) => {
-    if (!trigger.contains(e.target) && !options.contains(e.target)) {
-      trigger.classList.remove('active');
-      options.classList.remove('open');
+      document.addEventListener('click', (e) => {
+        if (!trigger.contains(e.target) && !options.contains(e.target)) {
+          trigger.classList.remove('active');
+          options.classList.remove('open');
+        }
+      });
     }
-  });
-}
   </script>
-  <!-- Модальное окно уведомлений -->
-<div class="msg-overlay" id="msgOverlay">
-  <div class="msg-box">
-    <div class="msg-icon" id="msgIcon">✅</div>
-    <div class="msg-title" id="msgTitle">Готово</div>
-    <div class="msg-text" id="msgText">Операция выполнена</div>
-    <button class="msg-btn" id="msgBtn">ОК</button>
-  </div>
-</div>
-
-<!-- Модальное окно подтверждения -->
-<div class="msg-overlay" id="confirmOverlay">
-  <div class="msg-box">
-    <div class="msg-icon">❓</div>
-    <div class="msg-title" id="confirmTitle">Подтверждение</div>
-    <div class="msg-text" id="confirmText">Вы уверены?</div>
-    <div style="display:flex; gap:0.5rem;">
-      <button class="msg-btn" id="confirmNo" style="background:#64748b;">Отмена</button>
-      <button class="msg-btn" id="confirmYes">Да</button>
-    </div>
-  </div>
-</div>
 </body>
 </html>

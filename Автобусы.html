@@ -6,32 +6,9 @@
   <title>ООО «МирнГорТранс» • Автобусы</title>
   <link rel="stylesheet" href="Общие стили.css">
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-<script src="https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://unpkg.com/@vkid/sdk@2.6.1/dist-sdk/umd/index.js"></script>
 </head>
-<!-- Модальное окно авторизации -->
-<div class="auth-overlay" id="authOverlay">
-  <div class="auth-modal">
-    <button class="auth-modal-close" id="authClose">&times;</button>
-    <div class="auth-modal-icon">🔐</div>
-    <h3>Вход в систему</h3>
-    <p class="auth-subtitle">ЧАТП «МирнГорТранс»</p>
-    
-    <div class="form-group">
-      <label for="authUsername">Логин</label>
-      <input type="text" id="authUsername" class="input-user" placeholder="Введите логин" autocomplete="username">
-    </div>
-    
-    <div class="form-group">
-      <label for="authPassword">Пароль</label>
-      <input type="password" id="authPassword" class="input-pass" placeholder="Введите пароль" autocomplete="current-password">
-    </div>
-    
-    <button class="btn-auth-submit" id="authSubmit">Войти</button>
-<button id="vkLoginBtn" style="width:100%; padding:0.8rem; margin-top:0.5rem; background:#0077FF; color:white; border:none; border-radius:14px; font-size:1rem; font-weight:600; cursor:pointer;">🔵 Войти через VK</button>
-<div class="auth-error" id="authError"></div>
-  </div>
-</div>
 <body>
   <div class="app-container">
     <!-- Шапка -->
@@ -59,364 +36,59 @@
       <section class="page">
         <h2>💰 Автобусы</h2>
         <div class="table-wrapper">
-
           <table class="bus-table">
-          <thead>
-            <tr>
-              <th>Автобус</th>
-              <th>Маршрут № м2</th>
-              <th>Маршрут № 24</th>
-              <th>Маршрут № 24к</th>
-              <th>Маршрут № 102</th>
-              <th>Маршрут № с22</th>
-              <th>Маршрут № 408</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>ГАЗ-322132 «Бизнес»</td>
-              <td>❌</td>
-              <td>❌</td>
-              <td>✅</td>
-              <td>❌</td>
-              <td>❌</td>
-              <td>✅</td>
-            </tr>
-            <tr>
-              <td>ПАЗ-32053</td>
-              <td>❌</td>
-              <td>❌</td>
-              <td>✅</td>
-              <td>❌</td>
-              <td>❌</td>
-              <td>✅</td>
-            </tr>
-            <tr>
-              <td>ПАЗ-32054 (бензин)</td>
-              <td>✅</td>
-              <td>✅</td>
-              <td>❌</td>
-              <td>✅</td>
-              <td>✅</td>
-              <td>✅</td>
-            </tr>
-            <tr>
-              <td>ПАЗ-32054 (дизель)</td>
-              <td>✅</td>
-              <td>✅</td>
-              <td>❌</td>
-              <td>✅</td>
-              <td>✅</td>
-              <td>✅</td>
-            </tr>
-            <tr>
-              <td>Богдан А092</td>
-              <td>✅</td>
-              <td>✅</td>
-              <td>❌</td>
-              <td>✅</td>
-              <td>✅</td>
-              <td>✅</td>
-            </tr>
-            <tr>
-            <td>ГАЗ-A64R42 Next «Ситилайн»</td>
-              <td>❌</td>
-              <td>❌</td>
-              <td>✅</td>
-              <td>❌</td>
-              <td>❌</td>
-              <td>✅</td>
-            </tr>
-            <tr>
-            <td>ПАЗ-4234</td>
-              <td>✅</td>
-              <td>✅</td>
-              <td>❌</td>
-              <td>✅</td>
-              <td>✅</td>
-              <td>✅</td>
-            </tr>
-            <tr>
-            <td>Богдан А09302</td>
-              <td>✅</td>
-              <td>✅</td>
-              <td>❌</td>
-              <td>✅</td>
-              <td>✅</td>
-              <td>✅</td>
-            </tr>
-            <tr>
-            <td>Богдан А09304 «Атаман»</td>
-              <td>✅</td>
-              <td>✅</td>
-              <td>❌</td>
-              <td>✅</td>
-              <td>✅</td>
-              <td>✅</td>
-            </tr>
-            <tr>
-            <td>ПАЗ-32053 рестайлинг</td>
-              <td>❌</td>
-              <td>❌</td>
-              <td>✅</td>
-              <td>❌</td>
-              <td>❌</td>
-              <td>✅</td>
-            </tr>
-            <tr>
-            <td>ПАЗ-32054 рестайлинг</td>
-              <td>✅</td>
-              <td>✅</td>
-              <td>❌</td>
-              <td>✅</td>
-              <td>✅</td>
-              <td>✅</td>
-            </tr>
-            <tr>
-            <td>Mercedes-Benz Sprinter Classic 411 CDI (Base)</td>
-              <td>❌</td>
-              <td>❌</td>
-              <td>✅</td>
-              <td>❌</td>
-              <td>❌</td>
-              <td>✅</td>
-            </tr>
-            <tr>
-            <td>Mercedes-Benz Sprinter Classic 411 CDI (AS3)</td>
-              <td>❌</td>
-              <td>❌</td>
-              <td>✅</td>
-              <td>❌</td>
-              <td>❌</td>
-              <td>✅</td>
-            </tr>
-            <tr>
-            <td>ПАЗ-320405-04 «Vector Next»</td>
-                <td>✅</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>✅</td>
-                <td>✅</td>
-            </tr>
-            <tr>
-              <td>ПАЗ-672М</td>
-                <td>✅</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>✅</td>
-                <td>✅</td>
+            <thead>
+              <tr>
+                <th>Автобус</th>
+                <th>Маршрут № м2</th>
+                <th>Маршрут № 24</th>
+                <th>Маршрут № 24к</th>
+                <th>Маршрут № 102</th>
+                <th>Маршрут № с22</th>
+                <th>Маршрут № 408</th>
               </tr>
-              <tr>
-              <td>ПАЗ-320414-05 «Vector»</td>
-                <td>✅</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>✅</td>
-                <td>✅</td>
-              </tr>              
-              <tr>
-              <td>ПАЗ-4230 «Аврора»</td>
-                <td>✅</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>✅</td>
-                <td>✅</td>
-              </tr>              
-              <tr>
-              <td>ЛАЗ-695Н</td>
-                <td>✅</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>✅</td>
-                <td>✅</td>
-              </tr>             
-              <tr>
-              <td>ЛиАЗ-5256.00 (поздний вариант)</td>
-                <td>✅</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>❌</td>
-              </tr>         
-              <tr>
-              <td>ЛАЗ-4207</td>
-                <td>❌</td>
-                <td>❌</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>❌</td>
-              </tr>      
-              <tr>
-              <td>ЛиАЗ-5256.00-11</td>
-                <td>❌</td>
-                <td>❌</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>❌</td>
-              </tr>              
-              <tr>
-              <td>КАвЗ-4238 «Аврора»</td>
-                <td>❌</td>
-                <td>❌</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>❌</td>
-              </tr>                     
-              <tr>
-              <td>ЛАЗ-5207</td>
-                <td>❌</td>
-                <td>❌</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>❌</td>
-              </tr> 
-              <tr>
-              <td>ЛиАЗ-5256.40</td>
-                <td>✅</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>❌</td>
-              </tr>                             
-              <tr>
-              <td>Ikarus-260.50 (ширмовые двери)</td>
-                <td>✅</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>❌</td>
-              </tr>                             
-              <tr>
-              <td>Ikarus-260.50 (прислонно-поворотные двери)</td>
-                <td>✅</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>❌</td>
-              </tr>                             
-              <tr>
-              <td>Scania OmniLink CK95UB 4x2 LB (2 doors)</td>
-                <td>✅</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>❌</td>
-              </tr>                    
-              <tr>
-              <td>Scania OmniLink CK95UB 4x2 LB (3 doors)</td>
-                <td>✅</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>❌</td>
-              </tr>    
-              <tr>
-              <td>ЛиАЗ-4292.60</td>
-                <td>✅</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>✅</td>
-                <td>✅</td>
-              </tr>     
-              <tr>
-              <td>ЛАЗ-697Р «Турист»</td>
-                <td>❌</td>
-                <td>❌</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>❌</td>
-              </tr>             
-              <tr>
-              <td>Ikarus-256.54</td>
-                <td>❌</td>
-                <td>❌</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>❌</td>
-              </tr>     
-              <tr>
-              <td>ЛиАЗ-5292.22 (2-2-2)</td>
-                <td>✅</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>❌</td>
-              </tr>          
-              <tr>
-              <td>МАЗ-203.069</td>
-                <td>✅</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>❌</td>
-              </tr>     
-              <tr>
-              <td>Ikarus-250.59</td>
-                <td>❌</td>
-                <td>❌</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>❌</td>
-              </tr>     
-              <tr>
-              <td>ЛАЗ-699Р «Турист»</td>
-                <td>❌</td>
-                <td>❌</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>❌</td>
-              </tr>             
-              <tr>
-              <td>ЛиАз-677М</td>
-                <td>✅</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>❌</td>
-              </tr>               
-              <tr>
-              <td>ЛиАз-677 (ранний)</td>
-                <td>✅</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>❌</td>
-              </tr>               
-              <tr>
-              <td>ЛиАз-677Э</td>
-                <td>✅</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>✅</td>
-                <td>❌</td>
-                <td>❌</td>
-              </tr>               
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <tr><td>ГАЗ-322132 «Бизнес»</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td></tr>
+              <tr><td>ПАЗ-32053</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td></tr>
+              <tr><td>ПАЗ-32054 (бензин)</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+              <tr><td>ПАЗ-32054 (дизель)</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+              <tr><td>Богдан А092</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+              <tr><td>ГАЗ-A64R42 Next «Ситилайн»</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td></tr>
+              <tr><td>ПАЗ-4234</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+              <tr><td>Богдан А09302</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+              <tr><td>Богдан А09304 «Атаман»</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+              <tr><td>ПАЗ-32053 рестайлинг</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td></tr>
+              <tr><td>ПАЗ-32054 рестайлинг</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+              <tr><td>Mercedes-Benz Sprinter Classic 411 CDI (Base)</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td></tr>
+              <tr><td>Mercedes-Benz Sprinter Classic 411 CDI (AS3)</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td></tr>
+              <tr><td>ПАЗ-320405-04 «Vector Next»</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+              <tr><td>ПАЗ-672М</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+              <tr><td>ПАЗ-320414-05 «Vector»</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+              <tr><td>ПАЗ-4230 «Аврора»</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+              <tr><td>ЛАЗ-695Н</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+              <tr><td>ЛиАЗ-5256.00 (поздний вариант)</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td></tr>
+              <tr><td>ЛАЗ-4207</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td></tr>
+              <tr><td>ЛиАЗ-5256.00-11</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td></tr>
+              <tr><td>КАвЗ-4238 «Аврора»</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td></tr>
+              <tr><td>ЛАЗ-5207</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td></tr>
+              <tr><td>ЛиАЗ-5256.40</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td></tr>
+              <tr><td>Ikarus-260.50 (ширмовые двери)</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td></tr>
+              <tr><td>Ikarus-260.50 (прислонно-поворотные двери)</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td></tr>
+              <tr><td>Scania OmniLink CK95UB 4x2 LB (2 doors)</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td></tr>
+              <tr><td>Scania OmniLink CK95UB 4x2 LB (3 doors)</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td></tr>
+              <tr><td>ЛиАЗ-4292.60</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+              <tr><td>ЛАЗ-697Р «Турист»</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td></tr>
+              <tr><td>Ikarus-256.54</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td></tr>
+              <tr><td>ЛиАЗ-5292.22 (2-2-2)</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td></tr>
+              <tr><td>МАЗ-203.069</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td></tr>
+              <tr><td>Ikarus-250.59</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td></tr>
+              <tr><td>ЛАЗ-699Р «Турист»</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td></tr>
+              <tr><td>ЛиАз-677М</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td></tr>
+              <tr><td>ЛиАз-677 (ранний)</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td></tr>
+              <tr><td>ЛиАз-677Э</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td></tr>
+            </tbody>
+          </table>
         </div>
         <p style="margin-top: 1rem; color: #4b5563;">ГАЗ-322132 [новый окрас] — МК (доступные маршруты: №24к, сезонные) </p>
         <p style="margin-top: 1rem; color: #4b5563;">КАвЗ-3270 / КАвЗ-685М [старый окрас] — МК (НЕДОСТУПНЫ, в ЧАТП не принимаются) </p>
@@ -450,40 +122,56 @@
         <p style="margin-top: 1rem; color: #4b5563;">МАЗ-203.069 [новый окрас] — БК (доступны все маршруты, кроме №24к и сезонных) </p>
         <p style="margin-top: 1rem; color: #4b5563;">Ikarus-250.59 [новый окрас] — ОБК [межгород] (доступные маршруты: №102) </p>
         <p style="margin-top: 1rem; color: #4b5563;">ЛАЗ-699Р «Турист» [старый окрас] — ОБК [межгород] (доступные маршруты: №102) </p>
-        <p style="margin-top: 1rem; color: #4b5563;">ЛиАЗ-677 (все вариации) [старый окрас] — БК (доступны все маршруты, кроме №24к и сезонных). •  • </p>
+        <p style="margin-top: 1rem; color: #4b5563;">ЛиАЗ-677 (все вариации) [старый окрас] — БК (доступны все маршруты, кроме №24к и сезонных). • • </p>
       </section>
     </main>
   </div>
 
-  <script src="Общая логика.js"></script>
-  <script>
-document.addEventListener('DOMContentLoaded', () => {
-    initAuth();
-    updateLineMenuVisibility();
-    updateAdminMenuVisibility();
-});
-  </script>
-  <!-- Модальное окно уведомлений -->
-<div class="msg-overlay" id="msgOverlay">
-  <div class="msg-box">
-    <div class="msg-icon" id="msgIcon">✅</div>
-    <div class="msg-title" id="msgTitle">Готово</div>
-    <div class="msg-text" id="msgText">Операция выполнена</div>
-    <button class="msg-btn" id="msgBtn">ОК</button>
-  </div>
-</div>
-
-<!-- Модальное окно подтверждения -->
-<div class="msg-overlay" id="confirmOverlay">
-  <div class="msg-box">
-    <div class="msg-icon">❓</div>
-    <div class="msg-title" id="confirmTitle">Подтверждение</div>
-    <div class="msg-text" id="confirmText">Вы уверены?</div>
-    <div style="display:flex; gap:0.5rem;">
-      <button class="msg-btn" id="confirmNo" style="background:#64748b;">Отмена</button>
-      <button class="msg-btn" id="confirmYes">Да</button>
+  <!-- Модальное окно авторизации -->
+  <div class="auth-overlay" id="authOverlay">
+    <div class="auth-modal">
+      <button class="auth-modal-close" id="authClose">&times;</button>
+      <div class="auth-modal-icon">🔐</div>
+      <h3>Вход в систему</h3>
+      <p class="auth-subtitle">ЧАТП «МирнГорТранс»</p>
+      <div class="form-group"><label for="authUsername">Логин</label><input type="text" id="authUsername" class="input-user" placeholder="Введите логин" autocomplete="username"></div>
+      <div class="form-group"><label for="authPassword">Пароль</label><input type="password" id="authPassword" class="input-pass" placeholder="Введите пароль" autocomplete="current-password"></div>
+      <button class="btn-auth-submit" id="authSubmit">Войти</button>
+      <button id="vkLoginBtn" style="width:100%; padding:0.8rem; margin-top:0.5rem; background:#0077FF; color:white; border:none; border-radius:14px; font-size:1rem; font-weight:600; cursor:pointer;">🔵 Войти через VK</button>
+      <div class="auth-error" id="authError"></div>
     </div>
   </div>
-</div>
+
+  <!-- Модальное окно уведомлений -->
+  <div class="msg-overlay" id="msgOverlay">
+    <div class="msg-box">
+      <div class="msg-icon" id="msgIcon">✅</div>
+      <div class="msg-title" id="msgTitle">Готово</div>
+      <div class="msg-text" id="msgText">Операция выполнена</div>
+      <button class="msg-btn" id="msgBtn">ОК</button>
+    </div>
+  </div>
+
+  <!-- Модальное окно подтверждения -->
+  <div class="msg-overlay" id="confirmOverlay">
+    <div class="msg-box">
+      <div class="msg-icon">❓</div>
+      <div class="msg-title" id="confirmTitle">Подтверждение</div>
+      <div class="msg-text" id="confirmText">Вы уверены?</div>
+      <div style="display:flex; gap:0.5rem;">
+        <button class="msg-btn" id="confirmNo" style="background:#64748b;">Отмена</button>
+        <button class="msg-btn" id="confirmYes">Да</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="Общая логика.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initAuth();
+      updateLineMenuVisibility();
+      updateAdminMenuVisibility();
+    });
+  </script>
 </body>
 </html>

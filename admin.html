@@ -5,98 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ЧАТП ООО «МирнГорТранс» • Управление персоналом</title>
   <link rel="stylesheet" href="Общие стили.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://unpkg.com/@vkid/sdk@2.6.1/dist-sdk/umd/index.js"></script>
   <style>
-    .admin-toolbar {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.5rem;
-    }
-    .admin-toolbar button {
-      padding: 0.7rem 1.5rem;
-      border: none;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 0.95rem;
-      cursor: pointer;
-      transition: 0.2s;
-    }
+    .admin-toolbar { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .admin-toolbar button { padding: 0.7rem 1.5rem; border: none; border-radius: 12px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
     .btn-create { background: #16a34a; color: white; }
     .btn-create:hover { background: #15803d; }
     .btn-edit { background: #2563eb; color: white; }
     .btn-edit:hover { background: #1d4ed8; }
     .btn-delete { background: #dc2626; color: white; }
     .btn-delete:hover { background: #b91c1c; }
-    
-    #employeesTable tbody tr {
-      cursor: pointer;
-      transition: background 0.15s;
-      user-select: none;
-    }
-    #employeesTable tbody tr:hover {
-      background: #eef2ff;
-    }
-    #employeesTable tbody tr.selected {
-      background: #dbeafe;
-      outline: 2px solid #2563eb;
-      outline-offset: -2px;
-    }
-    
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 2000;
-      justify-content: center;
-      align-items: center;
-    }
+    #employeesTable tbody tr { cursor: pointer; transition: background 0.15s; user-select: none; }
+    #employeesTable tbody tr:hover { background: #eef2ff; }
+    #employeesTable tbody tr.selected { background: #dbeafe; outline: 2px solid #2563eb; outline-offset: -2px; }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; }
     .modal-overlay.active { display: flex; }
-    .modal-content {
-      background: white;
-      padding: 2rem;
-      border-radius: 20px;
-      width: 90%;
-      max-width: 450px;
-      position: relative;
-    }
-    .modal-close {
-      position: absolute;
-      top: 1rem; right: 1rem;
-      background: none; border: none;
-      font-size: 1.5rem; cursor: pointer;
-      color: #94a3b8;
-    }
+    .modal-content { background: white; padding: 2rem; border-radius: 20px; width: 90%; max-width: 450px; position: relative; }
+    .modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #94a3b8; }
     .modal-close:hover { color: #334155; }
   </style>
-<script src="https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js"></script>
 </head>
-<!-- Модальное окно авторизации -->
-<div class="auth-overlay" id="authOverlay">
-  <div class="auth-modal">
-    <button class="auth-modal-close" id="authClose">&times;</button>
-    <div class="auth-modal-icon">🔐</div>
-    <h3>Вход в систему</h3>
-    <p class="auth-subtitle">ЧАТП «МирнГорТранс»</p>
-    
-    <div class="form-group">
-      <label for="authUsername">Логин</label>
-      <input type="text" id="authUsername" class="input-user" placeholder="Введите логин" autocomplete="username">
-    </div>
-    
-    <div class="form-group">
-      <label for="authPassword">Пароль</label>
-      <input type="password" id="authPassword" class="input-pass" placeholder="Введите пароль" autocomplete="current-password">
-    </div>
-
-    <button class="btn-auth-submit" id="authSubmit">Войти</button>
-<button id="vkLoginBtn" style="width:100%; padding:0.8rem; margin-top:0.5rem; background:#0077FF; color:white; border:none; border-radius:14px; font-size:1rem; font-weight:600; cursor:pointer;">🔵 Войти через VK</button>
-<div class="auth-error" id="authError"></div>
-  </div>
-</div>
 <body>
   <div class="app-container">
-    <!-- Шапка -->
     <header class="header">
       <div class="logo-area">
         <div class="logo-icon"><img src="images/Белый логотип МГТ без фона.png" alt="ЧАТП" style="width: 90%; height: auto; max-height: 90%;"></div>
@@ -117,36 +49,18 @@
     <main>
       <section class="page">
         <h2>👥 Управление персоналом</h2>
-        
-        <div id="noAccessMessage" style="display: none;">
-          <p style="color: #b91c1c;">⚠ Доступ запрещён.</p>
-        </div>
-
+        <div id="noAccessMessage" style="display: none;"><p style="color: #b91c1c;">⚠ Доступ запрещён.</p></div>
         <div id="adminContent" style="display: none;">
-          
-          <!-- Панель инструментов -->
           <div class="admin-toolbar">
             <button class="btn-create" id="btnCreate">➕ Создать аккаунт</button>
             <button class="btn-edit" id="btnEdit" disabled>✏️ Редактировать</button>
             <button class="btn-delete" id="btnDelete" disabled>🗑 Удалить аккаунт</button>
           </div>
-          
           <div id="actionMessage"></div>
-
-          <!-- Таблица сотрудников -->
           <div class="table-wrapper">
             <table id="employeesTable">
-              <thead>
-                <tr>
-                  <th>NickName</th>
-                  <th>Логин</th>
-                  <th>Должность</th>
-                  <th>Дата создания</th>
-                </tr>
-              </thead>
-              <tbody id="employeesTableBody">
-                <tr><td colspan="4">Загрузка...</td></tr>
-              </tbody>
+              <thead><tr><th>NickName</th><th>Логин</th><th>Должность</th><th>Дата создания</th></tr></thead>
+              <tbody id="employeesTableBody"><tr><td colspan="4">Загрузка...</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -160,29 +74,14 @@
       <button class="modal-close" id="modalClose">&times;</button>
       <h3 id="modalTitle">Создать аккаунт</h3>
       <div id="modalFormMessage"></div>
-      <div class="form-group">
-        <label for="modalFullName">NickName</label>
-        <input type="text" id="modalFullName" placeholder="Введите NickName">
-      </div>
-      <div class="form-group">
-        <label for="modalUsername">Логин</label>
-        <input type="text" id="modalUsername" placeholder="Придумайте логин">
-      </div>
-      <div class="form-group">
-        <label for="modalPassword">Пароль</label>
-        <input type="text" id="modalPassword" placeholder="Придумайте пароль. Минимум 4 символа">
-      </div>
-      <div class="form-group">
-        <label for="modalVkId">VK ID сотрудника</label>
-        <input type="text" id="modalVkId" placeholder="Например: 123456789">
-      </div>
+      <div class="form-group"><label for="modalFullName">NickName</label><input type="text" id="modalFullName" placeholder="Введите NickName"></div>
+      <div class="form-group"><label for="modalUsername">Логин</label><input type="text" id="modalUsername" placeholder="Придумайте логин"></div>
+      <div class="form-group"><label for="modalPassword">Пароль</label><input type="text" id="modalPassword" placeholder="Придумайте пароль. Минимум 4 символа"></div>
+      <div class="form-group"><label for="modalVkId">VK ID сотрудника</label><input type="text" id="modalVkId" placeholder="Например: 123456789"></div>
       <div class="form-group">
         <label>Должность</label>
         <div class="custom-select" id="modalRoleSelect">
-          <div class="custom-select-trigger" id="modalRoleTrigger">
-            <span id="modalRoleText">Выберите должность</span>
-            <span class="arrow">▼</span>
-          </div>
+          <div class="custom-select-trigger" id="modalRoleTrigger"><span id="modalRoleText">Выберите должность</span><span class="arrow">▼</span></div>
           <div class="custom-select-options" id="modalRoleOptions"></div>
           <input type="hidden" id="modalRole" value="">
         </div>
@@ -204,8 +103,44 @@
     </div>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <!-- Модальное окно авторизации -->
+  <div class="auth-overlay" id="authOverlay">
+    <div class="auth-modal">
+      <button class="auth-modal-close" id="authClose">&times;</button>
+      <div class="auth-modal-icon">🔐</div>
+      <h3>Вход в систему</h3>
+      <p class="auth-subtitle">ЧАТП «МирнГорТранс»</p>
+      <div class="form-group"><label for="authUsername">Логин</label><input type="text" id="authUsername" class="input-user" placeholder="Введите логин"></div>
+      <div class="form-group"><label for="authPassword">Пароль</label><input type="password" id="authPassword" class="input-pass" placeholder="Введите пароль"></div>
+      <button class="btn-auth-submit" id="authSubmit">Войти</button>
+      <button id="vkLoginBtn" style="width:100%; padding:0.8rem; margin-top:0.5rem; background:#0077FF; color:white; border:none; border-radius:14px; font-size:1rem; font-weight:600; cursor:pointer;">🔵 Войти через VK</button>
+      <div class="auth-error" id="authError"></div>
+    </div>
+  </div>
+
+  <!-- Модальное окно уведомлений -->
+  <div class="msg-overlay" id="msgOverlay">
+    <div class="msg-box">
+      <div class="msg-icon" id="msgIcon">✅</div>
+      <div class="msg-title" id="msgTitle">Готово</div>
+      <div class="msg-text" id="msgText">Операция выполнена</div>
+      <button class="msg-btn" id="msgBtn">ОК</button>
+    </div>
+  </div>
+
+  <!-- Модальное окно подтверждения -->
+  <div class="msg-overlay" id="confirmOverlay">
+    <div class="msg-box">
+      <div class="msg-icon">❓</div>
+      <div class="msg-title" id="confirmTitle">Подтверждение</div>
+      <div class="msg-text" id="confirmText">Вы уверены?</div>
+      <div style="display:flex; gap:0.5rem;">
+        <button class="msg-btn" id="confirmNo" style="background:#64748b;">Отмена</button>
+        <button class="msg-btn" id="confirmYes">Да</button>
+      </div>
+    </div>
+  </div>
+
   <script src="Общая логика.js"></script>
   <script>
     let selectedUsernames = new Set();
@@ -224,25 +159,16 @@
       const options = document.getElementById(optionsId);
       const text = document.getElementById(textId);
       const hidden = document.getElementById(hiddenId);
-
-      trigger.addEventListener('click', () => {
-        trigger.classList.toggle('active');
-        options.classList.toggle('open');
-      });
-
+      trigger.addEventListener('click', () => { trigger.classList.toggle('active'); options.classList.toggle('open'); });
       document.addEventListener('click', (e) => {
         if (!trigger.contains(e.target) && !options.contains(e.target)) {
           trigger.classList.remove('active');
           options.classList.remove('open');
         }
       });
-
       return {
         setOptions: (roles, selectedValue) => {
-          options.innerHTML = roles.map(r => 
-            `<div class="custom-select-option ${r.value === selectedValue ? 'selected' : ''}" data-value="${r.value}">${r.name}</div>`
-          ).join('');
-          
+          options.innerHTML = roles.map(r => `<div class="custom-select-option ${r.value === selectedValue ? 'selected' : ''}" data-value="${r.value}">${r.name}</div>`).join('');
           options.querySelectorAll('.custom-select-option').forEach(opt => {
             opt.addEventListener('click', () => {
               text.textContent = opt.textContent;
@@ -255,15 +181,8 @@
           });
         },
         getValue: () => hidden.value,
-        setValue: (value, label) => {
-          hidden.value = value;
-          text.textContent = label || 'Выберите должность';
-        },
-        clear: () => {
-          hidden.value = '';
-          text.textContent = 'Выберите должность';
-          options.querySelectorAll('.custom-select-option').forEach(o => o.classList.remove('selected'));
-        }
+        setValue: (value, label) => { hidden.value = value; text.textContent = label || 'Выберите должность'; },
+        clear: () => { hidden.value = ''; text.textContent = 'Выберите должность'; options.querySelectorAll('.custom-select-option').forEach(o => o.classList.remove('selected')); }
       };
     }
 
@@ -271,66 +190,39 @@
       const user = getCurrentUser();
       const noAccessMessage = document.getElementById('noAccessMessage');
       const adminContent = document.getElementById('adminContent');
-
-      if (!user) {
-        noAccessMessage.style.display = 'block';
-        adminContent.style.display = 'none';
-        return;
-      }
-
-      if (user.role !== 'admin' && user.role !== 'gendirector' && user.role !== 'zamdirektora') {
-        noAccessMessage.style.display = 'block';
-        adminContent.style.display = 'none';
-        return;
-      }
-
+      if (!user) { noAccessMessage.style.display = 'block'; adminContent.style.display = 'none'; return; }
+      if (user.role !== 'admin' && user.role !== 'gendirector' && user.role !== 'zamdirektora') { noAccessMessage.style.display = 'block'; adminContent.style.display = 'none'; return; }
       noAccessMessage.style.display = 'none';
       adminContent.style.display = 'block';
-      
       loadEmployeesList();
       setupToolbarButtons();
       setupModalButtons();
     }
 
-    // ========== ТАБЛИЦА ==========
     async function loadEmployeesList() {
       const snapshot = await database.ref('users').once('value');
       const users = snapshot.val() || [];
       const tbody = document.getElementById('employeesTableBody');
-      
       let employees = users.filter(u => u.role !== 'admin');
-
       if (employees.length === 0) {
         tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Нет созданных сотрудников</td></tr>';
       } else {
         tbody.innerHTML = employees.map(emp => `
           <tr data-username="${emp.username}" class="${selectedUsernames.has(emp.username) ? 'selected' : ''}">
-            <td>${emp.name}</td>
-            <td>${emp.username}</td>
-            <td>${ROLE_NAMES[emp.role] || emp.role}</td>
-            <td>${emp.createdAt || '—'}</td>
-          </tr>
-        `).join('');
-        
+            <td>${emp.name}</td><td>${emp.username}</td><td>${ROLE_NAMES[emp.role] || emp.role}</td><td>${emp.createdAt || '—'}</td>
+          </tr>`).join('');
         tbody.querySelectorAll('tr').forEach(row => {
           row.addEventListener('click', () => {
             const username = row.dataset.username;
-            if (selectedUsernames.has(username)) {
-              selectedUsernames.delete(username);
-              row.classList.remove('selected');
-            } else {
-              selectedUsernames.add(username);
-              row.classList.add('selected');
-            }
+            if (selectedUsernames.has(username)) { selectedUsernames.delete(username); row.classList.remove('selected'); }
+            else { selectedUsernames.add(username); row.classList.add('selected'); }
             updateToolbarButtons();
           });
         });
       }
-      
       updateToolbarButtons();
     }
 
-    // ========== ПАНЕЛЬ ИНСТРУМЕНТОВ ==========
     function setupToolbarButtons() {
       document.getElementById('btnCreate').addEventListener('click', openCreateModal);
       document.getElementById('btnEdit').addEventListener('click', openEditModal);
@@ -340,20 +232,11 @@
     function updateToolbarButtons() {
       const btnEdit = document.getElementById('btnEdit');
       const btnDelete = document.getElementById('btnDelete');
-      
-      if (selectedUsernames.size === 1) {
-        btnEdit.disabled = false;
-        btnDelete.disabled = false;
-      } else if (selectedUsernames.size > 1) {
-        btnEdit.disabled = true;
-        btnDelete.disabled = false;
-      } else {
-        btnEdit.disabled = true;
-        btnDelete.disabled = true;
-      }
+      if (selectedUsernames.size === 1) { btnEdit.disabled = false; btnDelete.disabled = false; }
+      else if (selectedUsernames.size > 1) { btnEdit.disabled = true; btnDelete.disabled = false; }
+      else { btnEdit.disabled = true; btnDelete.disabled = true; }
     }
 
-    // ========== СОЗДАТЬ ==========
     function openCreateModal() {
       document.getElementById('modalTitle').textContent = '➕ Создать аккаунт';
       document.getElementById('modalSubmit').textContent = 'Создать';
@@ -361,127 +244,82 @@
       document.getElementById('modalFullName').value = '';
       document.getElementById('modalUsername').value = '';
       document.getElementById('modalPassword').value = '';
+      document.getElementById('modalVkId').value = '';
       document.getElementById('modalUsername').disabled = false;
-      
       const creatableRoles = getCreatableRoles(getCurrentUser().role);
       roleSelect.setOptions(creatableRoles, '');
       roleSelect.clear();
-      
       document.getElementById('formModal').classList.add('active');
     }
 
     function openEditModal() {
       if (selectedUsernames.size !== 1) return;
-      
       const username = [...selectedUsernames][0];
       database.ref('users').once('value').then(snapshot => {
         const users = snapshot.val() || [];
         const user = users.find(u => u.username === username);
         if (!user) return;
-        
         document.getElementById('modalTitle').textContent = '✏️ Редактировать аккаунт';
         document.getElementById('modalSubmit').textContent = 'Сохранить';
         document.getElementById('modalFormMessage').innerHTML = '';
         document.getElementById('modalFullName').value = user.name || '';
         document.getElementById('modalUsername').value = user.username;
         document.getElementById('modalPassword').value = user.password || '';
+        document.getElementById('modalVkId').value = user.vkId || '';
         document.getElementById('modalUsername').disabled = true;
-        
         const creatableRoles = getCreatableRoles(getCurrentUser().role);
         const roleName = ROLE_NAMES[user.role] || user.role;
         roleSelect.setOptions(creatableRoles, user.role);
         roleSelect.setValue(user.role, roleName);
-        
         document.getElementById('formModal').classList.add('active');
       });
     }
 
     function openDeleteModal() {
       if (selectedUsernames.size === 0) return;
-      
       const deleteList = document.getElementById('deleteList');
       const names = [...selectedUsernames];
       deleteList.innerHTML = names.map(u => `<p>• ${u}</p>`).join('');
-      document.getElementById('deleteMessage').textContent = 
-        `Вы уверены, что хотите удалить ${names.length} сотрудника(ов)?`;
+      document.getElementById('deleteMessage').textContent = `Вы уверены, что хотите удалить ${names.length} сотрудника(ов)?`;
       document.getElementById('deleteModal').classList.add('active');
     }
 
-    // ========== МОДАЛЬНЫЕ ОКНА ==========
     function setupModalButtons() {
-      document.getElementById('modalClose').addEventListener('click', () => {
-        document.getElementById('formModal').classList.remove('active');
-      });
-      
-      document.getElementById('deleteCancel').addEventListener('click', () => {
-        document.getElementById('deleteModal').classList.remove('active');
-      });
-      
-      document.getElementById('formModal').addEventListener('click', function(e) {
-        if (e.target === this) this.classList.remove('active');
-      });
-      document.getElementById('deleteModal').addEventListener('click', function(e) {
-        if (e.target === this) this.classList.remove('active');
-      });
-      
+      document.getElementById('modalClose').addEventListener('click', () => document.getElementById('formModal').classList.remove('active'));
+      document.getElementById('deleteCancel').addEventListener('click', () => document.getElementById('deleteModal').classList.remove('active'));
+      document.getElementById('formModal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('active'); });
+      document.getElementById('deleteModal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('active'); });
       document.getElementById('modalSubmit').addEventListener('click', async () => {
         const fullName = document.getElementById('modalFullName').value.trim();
         const username = document.getElementById('modalUsername').value.trim();
         const password = document.getElementById('modalPassword').value.trim();
+        const vkId = document.getElementById('modalVkId').value.trim();
         const role = roleSelect.getValue();
         const msgDiv = document.getElementById('modalFormMessage');
-        
-        if (!fullName || !username || !password || !role) {
-          msgDiv.innerHTML = '<div class="error-message">Заполните все поля</div>';
-          return;
-        }
-        
-        if (password.length < 4) {
-          msgDiv.innerHTML = '<div class="error-message">Пароль должен содержать минимум 4 символа.</div>';
-          return;
-        }
-        
+        if (!fullName || !username || !password || !role) { msgDiv.innerHTML = '<div class="error-message">Заполните все поля</div>'; return; }
+        if (password.length < 4) { msgDiv.innerHTML = '<div class="error-message">Пароль должен содержать минимум 4 символа.</div>'; return; }
         const currentUser = getCurrentUser();
-        if (!canCreateRole(currentUser.role, role)) {
-          msgDiv.innerHTML = '<div class="error-message">Нет прав на эту должность</div>';
-          return;
-        }
-        
+        if (!canCreateRole(currentUser.role, role)) { msgDiv.innerHTML = '<div class="error-message">Нет прав на эту должность</div>'; return; }
         const snapshot = await database.ref('users').once('value');
         const users = snapshot.val() || [];
-        
         if (document.getElementById('modalTitle').textContent.includes('Создать')) {
-          if (users.find(u => u.username === username)) {
-            msgDiv.innerHTML = '<div class="error-message">Такой логин уже существует</div>';
-            return;
-          }
-          users.push({
-            username, password, name: fullName, role,
-            createdAt: getMoscowDateString()
-          });
+          if (users.find(u => u.username === username)) { msgDiv.innerHTML = '<div class="error-message">Такой логин уже существует</div>'; return; }
+          users.push({ username, password, name: fullName, role, vkId, createdAt: getMoscowDateString() });
           msgDiv.innerHTML = '<div class="success-message">✅ Сотрудник создан!</div>';
         } else {
           const idx = users.findIndex(u => u.username === username);
-          if (idx >= 0) {
-            users[idx].name = fullName;
-            users[idx].password = password;
-            users[idx].role = role;
-            msgDiv.innerHTML = '<div class="success-message">✅ Данные обновлены!</div>';
-          }
+          if (idx >= 0) { users[idx].name = fullName; users[idx].password = password; users[idx].role = role; users[idx].vkId = vkId; msgDiv.innerHTML = '<div class="success-message">✅ Данные обновлены!</div>'; }
         }
-        
         await database.ref('users').set(users);
         document.getElementById('formModal').classList.remove('active');
         selectedUsernames.clear();
         loadEmployeesList();
       });
-      
       document.getElementById('deleteConfirm').addEventListener('click', async () => {
         const snapshot = await database.ref('users').once('value');
         let users = snapshot.val() || [];
         users = users.filter(u => !selectedUsernames.has(u.username));
         await database.ref('users').set(users);
-        
         document.getElementById('deleteModal').classList.remove('active');
         selectedUsernames.clear();
         loadEmployeesList();
@@ -495,27 +333,5 @@
       setTimeout(() => div.innerHTML = '', 3000);
     }
   </script>
-  <!-- Модальное окно уведомлений -->
-<div class="msg-overlay" id="msgOverlay">
-  <div class="msg-box">
-    <div class="msg-icon" id="msgIcon">✅</div>
-    <div class="msg-title" id="msgTitle">Готово</div>
-    <div class="msg-text" id="msgText">Операция выполнена</div>
-    <button class="msg-btn" id="msgBtn">ОК</button>
-  </div>
-</div>
-
-<!-- Модальное окно подтверждения -->
-<div class="msg-overlay" id="confirmOverlay">
-  <div class="msg-box">
-    <div class="msg-icon">❓</div>
-    <div class="msg-title" id="confirmTitle">Подтверждение</div>
-    <div class="msg-text" id="confirmText">Вы уверены?</div>
-    <div style="display:flex; gap:0.5rem;">
-      <button class="msg-btn" id="confirmNo" style="background:#64748b;">Отмена</button>
-      <button class="msg-btn" id="confirmYes">Да</button>
-    </div>
-  </div>
-</div>
 </body>
 </html>
