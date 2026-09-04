@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ООО «МирнГорТранс» • Диспетчер</title>
+  <link rel="stylesheet" href="Общие стили.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <style>
+    .quick-btn {
+      padding: 0.4rem 0.8rem; border: none; border-radius: 8px;
+      font-size: 0.85rem; font-weight: 600; cursor: pointer;
+      color: white; margin-right: 0.3rem;
+    }
+    .quick-online { background: #16a34a; }
+    .quick-afk { background: #d97706; }
+    .quick-offline { background: #dc2626; }
+  </style>
+  <script src="https://unpkg.com/@vkid/sdk/dist/index.umd.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <header class="header">
+      <div class="logo-area">
+        <div class="logo-icon"><img src="images/Белый логотип МГТ без фона.png" alt="ЧАТП" style="width: 80%; height: auto; border-radius: 14px; object-fit: cover;"></div>
+        <div class="logo-text">ООО «МирнГорТранс»</div>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html">О нас</a>
+        <a href="Заработные платы.html">Зарплаты</a>
+        <a href="Маршруты.html">Маршруты</a>
+        <a href="Выходы на маршруты.html" id="lineMenuLink">Выход на маршруты</a>
+        <a href="Диспетчер.html" class="active">Диспетчер</a>
+        <a href="admin.html" id="adminMenuLink" style="display: none;">Управление</a>
+        <a href="Автобусы.html">Автобусы</a>
+        <span id="authArea"></span>
+      </nav>
+    </header>
+
+    <main>
+      <section class="page">
+        <h2>📋 Диспетчер</h2>
+        
+        <div id="notAuthMessage" style="display: none;">
+          <p style="color: #b91c1c;">⚠ Необходимо <a href="#" id="loginLink">войти в систему</a>.</p>
+        </div>
+
+        <div id="dispatcherContent" style="display: none;">
+
+          <!-- Фильтры -->
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end; margin: 1.5rem 0;">
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <label style="font-weight: 600;">👤 Сотрудник:</label>
+              <div class="custom-select" style="width: 200px;">
+                <div class="custom-select-trigger" id="filterTrigger">
+                  <span id="filterText">Все сотрудники</span>
+                  <span class="arrow">▼</span>
+                </div>
+                <div class="custom-select-options" id="filterOptions"></div>
+                <input type="hidden" id="dispFilter" value="all">
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <label style="font-weight: 600;">📅 Месяц:</label>
+              <div class="custom-select" style="width: 160px;">
+                <div class="custom-select-trigger" id="monthTrigger">
+                  <span id="monthText">Все месяцы</span>
+                  <span class="arrow">▼</span>
+                </div>
+                <div class="custom-select-options" id="monthOptions">
+                  <div class="custom-select-option selected" data-value="all">Все месяцы</div>
+                  <div class="custom-select-option" data-value="01">Январь</div>
+                  <div class="custom-select-option" data-value="02">Февраль</div>
+                  <div class="custom-select-option" data-value="03">Март</div>
+                  <div class="custom-select-option" data-value="04">Апрель</div>
+                  <div class="custom-select-option" data-value="05">Май</div>
+                  <div class="custom-select-option" data-value="06">Июнь</div>
+                  <div class="custom-select-option" data-value="07">Июль</div>
+                  <div class="custom-select-option" data-value="08">Август</div>
+                  <div class="custom-select-option" data-value="09">Сентябрь</div>
+                  <div class="custom-select-option" data-value="10">Октябрь</div>
+                  <div class="custom-select-option" data-value="11">Ноябрь</div>
+                  <div class="custom-select-option" data-value="12">Декабрь</div>
+                </div>
+                <input type="hidden" id="monthFilter" value="all">
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <label style="font-weight: 600;">📆 Год:</label>
+              <div class="custom-select" style="width: 130px;">
+                <div class="custom-select-trigger" id="yearTrigger">
+                  <span id="yearText">Все года</span>
+                  <span class="arrow">▼</span>
+                </div>
+                <div class="custom-select-options" id="yearOptions">
+                  <div class="custom-select-option selected" data-value="all">Все года</div>
+                </div>
+                <input type="hidden" id="yearFilter" value="all">
+              </div>
+            </div>
+          </div>
+
+          <!-- Кнопки статусов -->
+          <div class="status-buttons" id="statusButtons" style="display: flex; gap: 1rem; flex-wrap: wrap; margin: 1.5rem 0;">
+            <button id="btnOnline" class="btn-status btn-online" style="flex:1; min-width:140px; padding:1rem 1.5rem; border:none; border-radius:16px; font-weight:700; font-size:1.1rem; cursor:pointer; color:white; background:#16a34a;">🟢 Вышел на линию</button>
+            <button id="btnAFK" class="btn-status btn-afk" style="flex:1; min-width:140px; padding:1rem 1.5rem; border:none; border-radius:16px; font-weight:700; font-size:1.1rem; cursor:pointer; color:white; background:#d97706;">🟡 АФК</button>
+            <button id="btnOffline" class="btn-status btn-offline" style="flex:1; min-width:140px; padding:1rem 1.5rem; border:none; border-radius:16px; font-weight:700; font-size:1.1rem; cursor:pointer; color:white; background:#dc2626;">🔴 Ушёл с линии</button>
+          </div>
+
+          <!-- Таблица -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3>👥 Текущие статусы сотрудников</h3>
+            <button id="deleteAdminBtn" class="btn-logout" style="display: none;" title="Удалить записи администратора">🗑 Удалить записи админа</button>
+          </div>
+          <div class="table-wrapper">
+            <table class="staff-table">
+              <thead>
+                <tr>
+                  <th>Ник</th>
+                  <th>Дата выхода</th>
+                  <th>Актив</th>
+                  <th>Должность</th>
+                </tr>
+              </thead>
+              <tbody id="dispTableBody">
+                <tr><td colspan="4">Загрузка...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="auth-overlay" id="authOverlay">
+    <div class="auth-modal">
+      <button class="auth-modal-close" id="authClose">&times;</button>
+      <div class="auth-modal-icon">🔐</div>
+      <h3>Вход в систему</h3>
+      <p class="auth-subtitle">ЧАТП «МирнГорТранс»</p>
+      <div class="form-group"><label for="authUsername">Логин</label><input type="text" id="authUsername" class="input-user" placeholder="Введите логин"></div>
+      <div class="form-group"><label for="authPassword">Пароль</label><input type="password" id="authPassword" class="input-pass" placeholder="Введите пароль"></div>
+      <button class="btn-auth-submit" id="authSubmit">Войти</button>
+      <div class="auth-error" id="authError"></div>
+    </div>
+  </div>
+
+  <script src="Общая логика.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initAuth();
+      updateLineMenuVisibility();
+      updateAdminMenuVisibility();
+      initDispatcher();
+    });
+
+    async function initDispatcher() {
+  const user = getCurrentUser();
+  if (!user) {
+    document.getElementById('notAuthMessage').style.display = 'block';
+    document.getElementById('dispatcherContent').style.display = 'none';
+    return;
+  }
+  
+  document.getElementById('notAuthMessage').style.display = 'none';
+  document.getElementById('dispatcherContent').style.display = 'block';
+  
+  // Инициализация кастомных селектов (после return)
+  initCustomSelect('monthTrigger', 'monthOptions', 'monthText', 'monthFilter', loadTable);
+  initCustomSelect('yearTrigger', 'yearOptions', 'yearText', 'yearFilter', loadTable);
+  
+  populateYearFilter();
+  await populateFilter();
+  await loadTable();
+
+      document.getElementById('btnOnline').addEventListener('click', async () => {
+        const filter = document.getElementById('dispFilter');
+        if (filter.value === 'all') { alert('Выберите сотрудника из списка'); return; }
+        const snap = await database.ref('users').once('value');
+        const usr = (snap.val() || []).find(u => u.username === filter.value);
+        if (usr) { await setStaffStatus(usr.username, usr.name, 'online'); await loadTable(); }
+      });
+
+      document.getElementById('btnAFK').addEventListener('click', async () => {
+        const filter = document.getElementById('dispFilter');
+        if (filter.value === 'all') { alert('Выберите сотрудника из списка'); return; }
+        const snap = await database.ref('users').once('value');
+        const usr = (snap.val() || []).find(u => u.username === filter.value);
+        if (usr) { await setStaffStatus(usr.username, usr.name, 'afk', 'Смена диспетчером'); await loadTable(); }
+      });
+
+      document.getElementById('btnOffline').addEventListener('click', async () => {
+        const filter = document.getElementById('dispFilter');
+        if (filter.value === 'all') { alert('Выберите сотрудника из списка'); return; }
+        const snap = await database.ref('users').once('value');
+        const usr = (snap.val() || []).find(u => u.username === filter.value);
+        if (usr) { await setStaffStatus(usr.username, usr.name, 'offline'); await loadTable(); }
+      });
+
+      document.getElementById('deleteAdminBtn').addEventListener('click', async () => {
+        if (!confirm('Удалить все записи администратора?')) return;
+        const staffList = await getStaffWithStatuses();
+        const updated = staffList.filter(s => s.role !== 'admin');
+        await saveStaffWithStatuses(updated);
+        await loadTable();
+      });
+
+      document.getElementById('monthFilter').addEventListener('change', loadTable);
+      document.getElementById('yearFilter').addEventListener('change', loadTable);
+    }
+
+    function populateYearFilter() {
+      const options = document.getElementById('yearOptions');
+      const currentYear = new Date().getFullYear();
+      for (let y = currentYear; y >= currentYear - 5; y--) {
+      options.innerHTML += `<div class="custom-select-option" data-value="${y}">${y}</div>`;
+    }
+}
+
+    async function populateFilter() {
+      const trigger = document.getElementById('filterTrigger');
+      const options = document.getElementById('filterOptions');
+      const text = document.getElementById('filterText');
+      const hidden = document.getElementById('dispFilter');
+      if (!trigger || !options) return;
+
+      const snap = await database.ref('users').once('value');
+      const users = (snap.val() || []).filter(u => u.role !== 'admin');
+
+      options.innerHTML = '<div class="custom-select-option selected" data-value="all">Все сотрудники</div>';
+      users.forEach(u => {
+        options.innerHTML += `<div class="custom-select-option" data-value="${u.username}">${u.name}</div>`;
+      });
+
+      trigger.onclick = () => { trigger.classList.toggle('active'); options.classList.toggle('open'); };
+      
+      options.querySelectorAll('.custom-select-option').forEach(opt => {
+        opt.onclick = async () => {
+          text.textContent = opt.textContent;
+          hidden.value = opt.dataset.value;
+          options.querySelectorAll('.custom-select-option').forEach(o => o.classList.remove('selected'));
+          opt.classList.add('selected');
+          trigger.classList.remove('active');
+          options.classList.remove('open');
+          await loadTable();
+        };
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!trigger.contains(e.target) && !options.contains(e.target)) {
+          trigger.classList.remove('active');
+          options.classList.remove('open');
+        }
+      });
+    }
+
+    async function loadTable() {
+      const filter = document.getElementById('dispFilter');
+      const monthFilter = document.getElementById('monthFilter').value;
+      const yearFilter = document.getElementById('yearFilter').value;
+      const tbody = document.getElementById('dispTableBody');
+
+      const staffList = await getStaffWithStatuses();
+      let filtered = staffList;
+
+      // Фильтр по сотруднику
+      if (filter && filter.value !== 'all') {
+        filtered = filtered.filter(s => s.username === filter.value);
+      }
+
+      // Фильтр по месяцу
+      if (monthFilter !== 'all') {
+        filtered = filtered.filter(s => s.exitDate && s.exitDate.split('.')[1] === monthFilter);
+      }
+
+      // Фильтр по году
+      if (yearFilter !== 'all') {
+        filtered = filtered.filter(s => s.exitDate && s.exitDate.split('.')[2] === yearFilter);
+      }
+
+      // Проверка записей админа
+      const hasAdmin = staffList.some(s => s.role === 'admin');
+      const delBtn = document.getElementById('deleteAdminBtn');
+      if (delBtn) {
+        delBtn.style.display = hasAdmin ? 'inline-block' : 'none';
+      }
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4">Нет данных</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(staff => {
+        let rowStyle = '';
+        switch(staff.status) {
+          case 'online': rowStyle = 'background:#f0fdf4;'; break;
+          case 'afk': rowStyle = 'background:#fef3c7;'; break;
+          default: rowStyle = 'background:#fef2f2;';
+        }
+
+        const activeTime = formatTime(staff.totalSeconds || 0);
+        const exitDate = staff.exitDate || '—';
+
+        return `
+          <tr style="${rowStyle}">
+            <td>${staff.name}</td>
+            <td>${exitDate}</td>
+            <td>${activeTime}</td>
+            <td>${ROLE_NAMES[staff.role] || 'driver'}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function formatTime(totalSeconds) {
+      if (!totalSeconds || totalSeconds < 0) return '00:00:00';
+      const h = Math.floor(totalSeconds / 3600);
+      const m = Math.floor((totalSeconds % 3600) / 60);
+      const s = totalSeconds % 60;
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function initCustomSelect(triggerId, optionsId, textId, hiddenId, onChange) {
+  const trigger = document.getElementById(triggerId);
+  const options = document.getElementById(optionsId);
+  const text = document.getElementById(textId);
+  const hidden = document.getElementById(hiddenId);
+  if (!trigger || !options) return;
+
+  trigger.onclick = () => { trigger.classList.toggle('active'); options.classList.toggle('open'); };
+
+  options.querySelectorAll('.custom-select-option').forEach(opt => {
+    opt.onclick = () => {
+      text.textContent = opt.textContent;
+      hidden.value = opt.dataset.value;
+      options.querySelectorAll('.custom-select-option').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      trigger.classList.remove('active');
+      options.classList.remove('open');
+      if (onChange) onChange();
+    };
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!trigger.contains(e.target) && !options.contains(e.target)) {
+      trigger.classList.remove('active');
+      options.classList.remove('open');
+    }
+  });
+}
+  </script>
+  <!-- Модальное окно уведомлений -->
+<div class="msg-overlay" id="msgOverlay">
+  <div class="msg-box">
+    <div class="msg-icon" id="msgIcon">✅</div>
+    <div class="msg-title" id="msgTitle">Готово</div>
+    <div class="msg-text" id="msgText">Операция выполнена</div>
+    <button class="msg-btn" id="msgBtn">ОК</button>
+  </div>
+</div>
+
+<!-- Модальное окно подтверждения -->
+<div class="msg-overlay" id="confirmOverlay">
+  <div class="msg-box">
+    <div class="msg-icon">❓</div>
+    <div class="msg-title" id="confirmTitle">Подтверждение</div>
+    <div class="msg-text" id="confirmText">Вы уверены?</div>
+    <div style="display:flex; gap:0.5rem;">
+      <button class="msg-btn" id="confirmNo" style="background:#64748b;">Отмена</button>
+      <button class="msg-btn" id="confirmYes">Да</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

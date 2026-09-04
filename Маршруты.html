@@ -7,20 +7,44 @@
   <link rel="stylesheet" href="Общие стили.css">
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="https://unpkg.com/@vkid/sdk/dist/index.umd.js"></script>
 </head>
+<!-- Модальное окно авторизации -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-modal">
+    <button class="auth-modal-close" id="authClose">&times;</button>
+    <div class="auth-modal-icon">🔐</div>
+    <h3>Вход в систему</h3>
+    <p class="auth-subtitle">ЧАТП «МирнГорТранс»</p>
+    
+    <div class="form-group">
+      <label for="authUsername">Логин</label>
+      <input type="text" id="authUsername" class="input-user" placeholder="Введите логин" autocomplete="username">
+    </div>
+    
+    <div class="form-group">
+      <label for="authPassword">Пароль</label>
+      <input type="password" id="authPassword" class="input-pass" placeholder="Введите пароль" autocomplete="current-password">
+    </div>
+    
+    <button class="btn-auth-submit" id="authSubmit">Войти</button>
+    <div class="auth-error" id="authError"></div>
+  </div>
+</div>
 <body>
   <div class="app-container">
     <!-- Шапка -->
     <header class="header">
       <div class="logo-area">
         <div class="logo-icon"><img src="images/Белый логотип МГТ без фона.png" alt="ЧАТП" style="width: 80%; height: auto; border-radius: 14px; object-fit: cover;"> </div>
-        <div class="logo-text">ООО<span> «МирнГорТранс»</span></div>
+        <div class="logo-text">ООО «МирнГорТранс»</div>
       </div>
       <nav class="nav-links">
         <a href="index.html">О нас</a>
         <a href="Заработные платы.html">Зарплаты</a>
         <a href="Маршруты.html" class="active">Маршруты</a>
         <a href="Выходы на маршруты.html" id="lineMenuLink" style="display: none;">Выход на маршруты</a>
+        <a href="Диспетчер.html" class="active">Диспетчер</a>
         <a href="admin.html" id="adminMenuLink" style="display: none;">Управление</a>
         <a href="Автобусы.html">Автобусы</a>
         <span id="authArea"></span>
@@ -88,5 +112,27 @@
     updateAdminMenuVisibility();
 });
   </script>
+  <!-- Модальное окно уведомлений -->
+<div class="msg-overlay" id="msgOverlay">
+  <div class="msg-box">
+    <div class="msg-icon" id="msgIcon">✅</div>
+    <div class="msg-title" id="msgTitle">Готово</div>
+    <div class="msg-text" id="msgText">Операция выполнена</div>
+    <button class="msg-btn" id="msgBtn">ОК</button>
+  </div>
+</div>
+
+<!-- Модальное окно подтверждения -->
+<div class="msg-overlay" id="confirmOverlay">
+  <div class="msg-box">
+    <div class="msg-icon">❓</div>
+    <div class="msg-title" id="confirmTitle">Подтверждение</div>
+    <div class="msg-text" id="confirmText">Вы уверены?</div>
+    <div style="display:flex; gap:0.5rem;">
+      <button class="msg-btn" id="confirmNo" style="background:#64748b;">Отмена</button>
+      <button class="msg-btn" id="confirmYes">Да</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

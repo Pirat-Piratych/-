@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="Общие стили.css">
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="https://unpkg.com/@vkid/sdk/dist/index.umd.js"></script>
   <style>
     .status-buttons {
       display: flex;
@@ -134,19 +135,42 @@
     }
   </style>
 </head>
+<!-- Модальное окно авторизации -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-modal">
+    <button class="auth-modal-close" id="authClose">&times;</button>
+    <div class="auth-modal-icon">🔐</div>
+    <h3>Вход в систему</h3>
+    <p class="auth-subtitle">ЧАТП «МирнГорТранс»</p>
+    
+    <div class="form-group">
+      <label for="authUsername">Логин</label>
+      <input type="text" id="authUsername" class="input-user" placeholder="Введите логин" autocomplete="username">
+    </div>
+    
+    <div class="form-group">
+      <label for="authPassword">Пароль</label>
+      <input type="password" id="authPassword" class="input-pass" placeholder="Введите пароль" autocomplete="current-password">
+    </div>
+    
+    <button class="btn-auth-submit" id="authSubmit">Войти</button>
+    <div class="auth-error" id="authError"></div>
+  </div>
+</div>
 <body>
   <div class="app-container">
     <!-- Шапка -->
     <header class="header">
       <div class="logo-area">
         <div class="logo-icon"><img src="images/Белый логотип МГТ без фона.png" alt="ЧАТП" style="width: 80%; height: auto; border-radius: 14px; object-fit: cover;"> </div>
-        <div class="logo-text">ООО<span> «МирнГорТранс»</span></div>
+        <div class="logo-text">ООО «МирнГорТранс»</div>
       </div>
       <nav class="nav-links">
         <a href="index.html">О нас</a>
         <a href="Заработные платы.html">Зарплаты</a>
         <a href="Маршруты.html">Маршруты</a>
         <a href="Выходы на маршруты.html" class="active" id="lineMenuLink">Выход на маршруты</a>
+        <a href="Диспетчер.html">Диспетчер</a>
         <a href="admin.html" id="adminMenuLink" style="display: none;">Управление</a>
         <a href="Автобусы.html">Автобусы</a>        
         <span id="authArea"></span>
@@ -187,6 +211,18 @@
             <div class="stat-item">🟡 АФК: <span id="afkCount">0</span></div>
             <div class="stat-item">👥 Всего: <span id="totalCount">0</span></div>
           </div>
+          <!-- Фильтр по сотрудникам -->
+<div style="margin: 1.5rem 0 1rem; display: flex; gap: 1rem; align-items: center;">
+  <label style="font-weight: 600;">👤 Сотрудник:</label>
+  <div class="custom-select" style="min-width: 180px; max-width: 250px;">
+    <div class="custom-select-trigger" id="filterTrigger">
+      <span id="filterText">Все сотрудники</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="custom-select-options" id="filterOptions"></div>
+    <input type="hidden" id="staffFilterSimple" value="all">
+  </div>
+</div>
 
           <!-- Списки сотрудников по статусам -->
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin: 1.5rem 0;">
@@ -207,24 +243,22 @@
 </div>
 
           <!-- Таблица сотрудников -->
-          <div class="employees-table">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-              <h3>👥 Текущие статусы сотрудников</h3>
-              <button id="clearTableBtn" class="btn-logout" style="display: none;" title="Очистить всю таблицу">🗑 Очистить таблицу</button>
-            </div>
-            <table>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3>👥 Текущие статусы сотрудников</h3>
+            <button id="deleteAdminBtn" class="btn-logout" style="display: none;" title="Удалить записи администратора">🗑 Удалить записи админа</button>
+          </div>
+            <table class="staff-table">
               <thead>
                 <tr>
                   <th>Ник</th>
                   <th>Дата выхода</th>
                   <th>Актив</th>
                   <th>Должность</th>
-                  <th>Действия</th>
                 </tr>
               </thead>
               <tbody id="staffTableBody">
                 <tr>
-                  <td colspan="5" style="text-align: center;">Загрузка...</td>
+                  <td colspan="4" style="text-align: center;">Загрузка...</td>
                 </tr>
               </tbody>
             </table>
@@ -264,11 +298,47 @@
       initLinePage();
   // Показываем кнопку очистки только админу
   const user = getCurrentUser();
-  const clearBtn = document.getElementById('clearTableBtn');
-  if (user && user.role === 'admin' && clearBtn) {
-    clearBtn.style.display = 'block';
+});
+// Кнопка удаления записей админа
+async function checkAdminRecords() {
+  const staffList = await getStaffWithStatuses();
+  const hasAdmin = staffList.some(s => s.role === 'admin');
+  const delBtn = document.getElementById('deleteAdminBtn');
+  if (delBtn) {
+    delBtn.style.display = hasAdmin ? 'inline-block' : 'none';
   }
+}
+
+document.getElementById('deleteAdminBtn')?.addEventListener('click', async () => {
+  if (!confirm('Удалить все записи администратора?')) return;
+  const staffList = await getStaffWithStatuses();
+  const updated = staffList.filter(s => s.role !== 'admin');
+  await saveStaffWithStatuses(updated);
+  await loadStaffTable();
+  await checkAdminRecords();
 });
   </script>
+  <!-- Модальное окно уведомлений -->
+<div class="msg-overlay" id="msgOverlay">
+  <div class="msg-box">
+    <div class="msg-icon" id="msgIcon">✅</div>
+    <div class="msg-title" id="msgTitle">Готово</div>
+    <div class="msg-text" id="msgText">Операция выполнена</div>
+    <button class="msg-btn" id="msgBtn">ОК</button>
+  </div>
+</div>
+
+<!-- Модальное окно подтверждения -->
+<div class="msg-overlay" id="confirmOverlay">
+  <div class="msg-box">
+    <div class="msg-icon">❓</div>
+    <div class="msg-title" id="confirmTitle">Подтверждение</div>
+    <div class="msg-text" id="confirmText">Вы уверены?</div>
+    <div style="display:flex; gap:0.5rem;">
+      <button class="msg-btn" id="confirmNo" style="background:#64748b;">Отмена</button>
+      <button class="msg-btn" id="confirmYes">Да</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

@@ -10,7 +10,6 @@ async function initLinePage() {
   const staffTableBody = document.getElementById('staffTableBody');
   const afkReasonModal = document.getElementById('afkReasonModal');
   const afkReasonSelect = document.getElementById('afkReasonSelect');
-  const clearTableBtn = document.getElementById('clearTableBtn');
 
   if (!user) {
     if (notAuthMessage) notAuthMessage.style.display = 'block';
@@ -20,6 +19,50 @@ async function initLinePage() {
 
   if (notAuthMessage) notAuthMessage.style.display = 'none';
   if (lineContent) lineContent.style.display = 'block';
+  await populateStaffFilter();
+
+  async function populateStaffFilter() {
+    const trigger = document.getElementById('filterTrigger');
+    const options = document.getElementById('filterOptions');
+    const text = document.getElementById('filterText');
+    const hidden = document.getElementById('staffFilterSimple');
+    
+    if (!trigger || !options || !text || !hidden) return;
+    
+    const snapshot = await database.ref('users').once('value');
+    const users = (snapshot.val() || []).filter(u => u.role !== 'admin');
+    
+    options.innerHTML = '<div class="custom-select-option selected" data-value="all">Все сотрудники</div>';
+    users.forEach(u => {
+      options.innerHTML += `<div class="custom-select-option" data-value="${u.username}">${u.name}</div>`;
+    });
+    
+    trigger.onclick = () => {
+      trigger.classList.toggle('active');
+      options.classList.toggle('open');
+    };
+    
+    options.querySelectorAll('.custom-select-option').forEach(opt => {
+      opt.onclick = async () => {
+        text.textContent = opt.textContent;
+        hidden.value = opt.dataset.value;
+        options.querySelectorAll('.custom-select-option').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        trigger.classList.remove('active');
+        options.classList.remove('open');
+        
+        await loadStaffTable();
+        await updateStaffLists();
+      };
+    });
+    
+    document.addEventListener('click', (e) => {
+      if (!trigger.contains(e.target) && !options.contains(e.target)) {
+        trigger.classList.remove('active');
+        options.classList.remove('open');
+      }
+    });
+  }
 
   await updateAllStats();
   updateStatusButtons();
@@ -27,7 +70,7 @@ async function initLinePage() {
 
   setInterval(async () => {
     await updateAllStats();
-    await loadStaffTable();
+    await updateStaffLists();
   }, 1000);
 
   document.getElementById('btnOnline')?.addEventListener('click', async () => {
@@ -40,19 +83,19 @@ async function initLinePage() {
   document.getElementById('btnAFK')?.addEventListener('click', async () => {
     const currentStatus = await getStaffStatus(user.username);
     if (currentStatus !== STAFF_STATUSES.ONLINE) {
-      alert('❌ Вы не на линии. Сначала нажмите «Вышел на линию».');
+      showMessage('ℹ️', 'Уведомление', 'Вы не на линии. Сначала нажмите «Вышел на линию».');
       return;
     }
     afkReasonModal.style.display = 'flex';
   });
 
-  document.getElementById('btnOffline')?.addEventListener('click', async () => {
-    if (confirm('Вы уверены, что хотите уйти с линии?')) {
+  document.getElementById('btnOffline')?.addEventListener('click', () => {
+    showConfirm('Подтверждение', 'Вы уверены, что хотите уйти с линии?', async () => {
       await setStaffStatus(user.username, user.name, STAFF_STATUSES.OFFLINE);
       await updateAllStats();
       updateStatusButtons();
       await loadStaffTable();
-    }
+    });
   });
 
   document.getElementById('confirmAFK')?.addEventListener('click', async () => {
@@ -74,39 +117,24 @@ async function initLinePage() {
     
     if (!targetStaff) return;
     
-    // Проверяем: удалить можно только администратора
     if (targetStaff.role !== 'admin') {
-      alert('❌ Удалять можно только записи администратора.');
+      showMessage('ℹ️', 'Уведомление', 'Удалять можно только записи администратора.');
       return;
     }
     
-    if (!confirm(`Удалить запись о сотруднике "${targetStaff.name}" из таблицы статусов?`)) return;
-    
-    const updatedList = staffList.filter(s => s.username !== username);
-    await saveStaffWithStatuses(updatedList);
-    
-    await updateAllStats();
-    await loadStaffTable();
-  };
-
-  if (clearTableBtn) {
-    clearTableBtn.addEventListener('click', async () => {
-      if (!confirm('Вы уверены, что хотите очистить ВСЮ таблицу статусов?')) return;
-      
-      await saveStaffWithStatuses([]);
+    showConfirm('Подтверждение', `Удалить запись о сотруднике "${targetStaff.name}"?`, async () => {
+      const updatedList = staffList.filter(s => s.username !== username);
+      await saveStaffWithStatuses(updatedList);
       await updateAllStats();
       await loadStaffTable();
-      
-      alert('✅ Таблица статусов полностью очищена.');
     });
-  }
+  };
 
   async function updateAllStats() {
     const staffList = await getStaffWithStatuses();
     const onlineCount = staffList.filter(s => s.status === STAFF_STATUSES.ONLINE).length;
     const afkCount = staffList.filter(s => s.status === STAFF_STATUSES.AFK).length;
     
-    // Получаем всех пользователей из Firebase и исключаем админа
     const snapshot = await database.ref('users').once('value');
     const allUsers = (snapshot.val() || []).filter(u => u.role !== 'admin');
     
@@ -116,6 +144,7 @@ async function initLinePage() {
     
     const currentStatus = await getStaffStatus(user.username);
     const activeTime = await getActiveTime(user.username);
+    
     if (currentStatusSpan) {
       switch(currentStatus) {
         case STAFF_STATUSES.ONLINE:
@@ -130,11 +159,6 @@ async function initLinePage() {
           break;
       }
     }
-    
-    if (currentActiveSpan) {
-      currentActiveSpan.textContent = activeTime;
-    }
-  
     
     if (currentActiveSpan) {
       currentActiveSpan.textContent = activeTime;
@@ -156,35 +180,23 @@ async function initLinePage() {
     });
 
     if (currentStatus === STAFF_STATUSES.ONLINE) {
-      // На линии: нельзя "Вышел на линию"
       if (btnOnline) { btnOnline.disabled = true; btnOnline.style.opacity = '0.6'; btnOnline.style.cursor = 'not-allowed'; }
     } else if (currentStatus === STAFF_STATUSES.AFK) {
-      // В АФК: нельзя только "АФК"
       if (btnAFK) { btnAFK.disabled = true; btnAFK.style.opacity = '0.6'; btnAFK.style.cursor = 'not-allowed'; }
     } else if (currentStatus === STAFF_STATUSES.OFFLINE) {
-      // Не на линии: нельзя "АФК" и "Ушёл с линии"
       if (btnAFK) { btnAFK.disabled = true; btnAFK.style.opacity = '0.6'; btnAFK.style.cursor = 'not-allowed'; }
       if (btnOffline) { btnOffline.disabled = true; btnOffline.style.opacity = '0.6'; btnOffline.style.cursor = 'not-allowed'; }
-    }
-  
-
-    switch(currentStatus) {
-      case STAFF_STATUSES.ONLINE:
-        if (btnOnline) { btnOnline.disabled = true; btnOnline.style.opacity = '0.6'; btnOnline.style.cursor = 'not-allowed'; }
-        break;
-      case STAFF_STATUSES.AFK:
-        if (btnAFK) { btnAFK.disabled = true; btnAFK.style.opacity = '0.6'; btnAFK.style.cursor = 'not-allowed'; }
-        break;
-      case STAFF_STATUSES.OFFLINE:
-        if (btnOffline) { btnOffline.disabled = true; btnOffline.style.opacity = '0.6'; btnOffline.style.cursor = 'not-allowed'; }
-        break;
     }
   }
 
   async function loadStaffTable() {
     if (!staffTableBody) return;
     
-    const staffList = await getStaffWithStatuses();
+    let staffList = await getStaffWithStatuses();
+    const filter = document.getElementById('staffFilterSimple');
+    if (filter && filter.value !== 'all') {
+      staffList = staffList.filter(s => s.username === filter.value);
+    }
     const currentUserRole = getCurrentUser()?.role;
     
     if (staffList.length === 0) {
@@ -201,18 +213,12 @@ async function initLinePage() {
         
         const activeTime = await getActiveTime(staff.username);
         const exitDate = staff.exitDate || '—';
-        
-        const deleteButton = (currentUserRole === 'admin' && staff.role === 'admin')
-  ? `<button class="btn-danger" onclick="deleteStaffFromTable('${staff.username}')" title="Удалить запись">❌</button>`
-  : '';
-        
         rows.push(`
           <tr style="${rowStyle}">
             <td>${staff.name}</td>
             <td>${exitDate}</td>
             <td><strong>${activeTime}</strong></td>
             <td>${ROLE_NAMES[staff.role] || staff.role}</td>
-            <td>${deleteButton}</td>
           </tr>
         `);
       }
@@ -230,35 +236,23 @@ async function initLinePage() {
     
     const onlineList = document.getElementById('onlineList');
     if (onlineList) {
-      if (onlineStaff.length === 0) {
-        onlineList.innerHTML = '<em style="color: #94a3b8;">Никого нет</em>';
-      } else {
-        onlineList.innerHTML = onlineStaff.map(s => 
-          `<div class="staff-chip">${s.name}</div>`
-        ).join('');
-      }
+      onlineList.innerHTML = onlineStaff.length === 0 
+        ? '<em style="color: #94a3b8;">Никого нет</em>' 
+        : onlineStaff.map(s => `<div class="staff-chip">${s.name}</div>`).join('');
     }
     
     const afkList = document.getElementById('afkList');
     if (afkList) {
-      if (afkStaff.length === 0) {
-        afkList.innerHTML = '<em style="color: #94a3b8;">Никого нет</em>';
-      } else {
-        afkList.innerHTML = afkStaff.map(s => 
-          `<div class="staff-chip">${s.name} <span style="font-size:0.8rem;">(${s.afkReason || 'не указана'})</span></div>`
-        ).join('');
-      }
+      afkList.innerHTML = afkStaff.length === 0 
+        ? '<em style="color: #94a3b8;">Никого нет</em>' 
+        : afkStaff.map(s => `<div class="staff-chip">${s.name} <span style="font-size:0.8rem;">(${s.afkReason || 'не указана'})</span></div>`).join('');
     }
     
     const offlineList = document.getElementById('offlineList');
     if (offlineList) {
-      if (offlineStaff.length === 0) {
-        offlineList.innerHTML = '<em style="color: #94a3b8;">Никого нет</em>';
-      } else {
-        offlineList.innerHTML = offlineStaff.map(s => 
-          `<div class="staff-chip">${s.name}</div>`
-        ).join('');
-      }
+      offlineList.innerHTML = offlineStaff.length === 0 
+        ? '<em style="color: #94a3b8;">Никого нет</em>' 
+        : offlineStaff.map(s => `<div class="staff-chip">${s.name}</div>`).join('');
     }
   }
 }

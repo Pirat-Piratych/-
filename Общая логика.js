@@ -1,7 +1,4 @@
 // ==================== FIREBASE КОНФИГУРАЦИЯ ====================
-// Замените эти значения на свои из Firebase Console:
-// Project settings → Add app → Web → скопируйте конфиг
-
 const firebaseConfig = {
   apiKey: "AIzaSyBDp3pWmEEC-vRQTy63bvmfSpBC1WvaPm8",
   authDomain: "mirngortrans.firebaseapp.com",
@@ -11,6 +8,7 @@ const firebaseConfig = {
   messagingSenderId: "447944768770",
   appId: "1:447944768770:web:87aeb1a4f1fcaaa90d961b"
 };
+const VK_APP_ID = 54752829;
 
 // Инициализация Firebase
 firebase.initializeApp(firebaseConfig);
@@ -21,7 +19,6 @@ const DEFAULT_USERS = [
   { username: 'admin', password: 'admin123', role: 'admin', name: 'Администратор' }
 ];
 
-// Инициализация базы данных при первом запуске
 database.ref('users').once('value', (snapshot) => {
   if (!snapshot.exists()) {
     database.ref('users').set(DEFAULT_USERS);
@@ -51,6 +48,50 @@ const STAFF_STATUSES = {
   ONLINE: 'online',
   AFK: 'afk'
 };
+
+// ==================== КРАСИВЫЕ УВЕДОМЛЕНИЯ ====================
+function showMessage(icon, title, text, onClose = null) {
+  const overlay = document.getElementById('msgOverlay');
+  if (!overlay) {
+    alert(text);
+    return;
+  }
+  
+  document.getElementById('msgIcon').textContent = icon;
+  document.getElementById('msgTitle').textContent = title;
+  document.getElementById('msgText').textContent = text;
+  
+  overlay.classList.add('active');
+  
+  document.getElementById('msgBtn').onclick = () => {
+    overlay.classList.remove('active');
+    if (onClose) onClose();
+  };
+}
+
+function showConfirm(title, text, onYes, onNo = null) {
+  const overlay = document.getElementById('confirmOverlay');
+  if (!overlay) {
+    if (confirm(text)) onYes();
+    else if (onNo) onNo();
+    return;
+  }
+  
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmText').textContent = text;
+  
+  overlay.classList.add('active');
+  
+  document.getElementById('confirmYes').onclick = () => {
+    overlay.classList.remove('active');
+    if (onYes) onYes();
+  };
+  
+  document.getElementById('confirmNo').onclick = () => {
+    overlay.classList.remove('active');
+    if (onNo) onNo();
+  };
+}
 
 // ==================== ФУНКЦИИ РАБОТЫ С ДАННЫМИ ====================
 function getCurrentUser() {
@@ -98,26 +139,55 @@ function initAuth() {
       showLoginDialog();
     });
   }
+  
+  initVKLogin();
 }
 
-async function showLoginDialog() {
-  const username = prompt('Введите логин:');
-  if (!username) return;
-  const password = prompt('Введите пароль:');
-  if (!password) return;
-
-  const snapshot = await database.ref('users').once('value');
-  const users = snapshot.val() || [];
-  const found = users.find(u => u.username === username && u.password === password);
-
-  if (found) {
-    const user = { username: found.username, name: found.name, role: found.role };
-    setCurrentUser(user);
-    alert(`Добро пожаловать, ${found.name || found.username}! (${ROLE_NAMES[found.role]})`);
-    location.reload();
-  } else {
-    alert('❌ Неверный логин или пароль.');
+// Показ окна авторизации
+function showLoginDialog() {
+  const overlay = document.getElementById('authOverlay');
+  const closeBtn = document.getElementById('authClose');
+  const submitBtn = document.getElementById('authSubmit');
+  const usernameInput = document.getElementById('authUsername');
+  const passwordInput = document.getElementById('authPassword');
+  const errorDiv = document.getElementById('authError');
+  
+  if (!overlay) return;
+  
+  overlay.classList.add('active');
+  errorDiv.textContent = '';
+  usernameInput.value = '';
+  passwordInput.value = '';
+  
+  setTimeout(() => usernameInput.focus(), 200);
+  
+  closeBtn.onclick = () => overlay.classList.remove('active');
+  overlay.onclick = (e) => { if (e.target === overlay) overlay.classList.remove('active'); };
+  
+  async function doLogin() {
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+    
+    if (!username || !password) {
+      errorDiv.textContent = 'Заполните все поля';
+      return;
+    }
+    
+    const snapshot = await database.ref('users').once('value');
+    const users = snapshot.val() || [];
+    const found = users.find(u => u.username === username && u.password === password);
+    
+    if (found) {
+      setCurrentUser({ username: found.username, name: found.name, role: found.role });
+      overlay.classList.remove('active');
+      showMessage('✅', 'Добро пожаловать!', `${found.name || found.username}, вы вошли в систему.`, () => location.reload());
+    } else {
+      errorDiv.textContent = '❌ Неверный логин или пароль';
+    }
   }
+  
+  submitBtn.onclick = doLogin;
+  passwordInput.onkeydown = (e) => { if (e.key === 'Enter') doLogin(); };
 }
 
 function logout() {
@@ -126,8 +196,9 @@ function logout() {
     removeFromLine(user.username);
   }
   clearCurrentUser();
-  alert('Вы вышли из системы.');
-  window.location.href = 'index.html';
+  showMessage('👋', 'Вы вышли из системы', 'До новых встреч!', () => {
+    window.location.href = 'index.html';
+  });
 }
 
 // ==================== НАВИГАЦИЯ ====================
@@ -147,6 +218,44 @@ function updateAdminMenuVisibility() {
   } else {
     adminLink.style.display = 'none';
   }
+}
+
+// ==================== АВТОРИЗАЦИЯ ЧЕРЕЗ VK ====================
+function initVKLogin() {
+  const btn = document.getElementById('vkLoginBtn');
+  if (!btn) return;
+  
+  btn.addEventListener('click', async () => {
+    try {
+      const VKID = window.VKIDSDK;
+      if (!VKID) {
+        showMessage('⚠️', 'Ошибка', 'SDK не загрузился. Обновите страницу.');
+        return;
+      }
+      
+      VKID.Config.set({
+        app: VK_APP_ID,
+        redirectUrl: window.location.href
+      });
+      
+      const auth = await VKID.Auth.login();
+      const vkId = auth.user.id;
+      
+      const snapshot = await database.ref('users').once('value');
+      const users = snapshot.val() || [];
+      const found = users.find(u => u.vkId == vkId);
+      
+      if (found) {
+        setCurrentUser({ username: found.username, name: found.name, role: found.role });
+        showMessage('✅', 'Добро пожаловать!', `${found.name}, вход выполнен.`, () => location.reload());
+      } else {
+        showMessage('❌', 'Ошибка', 'Ваш VK не привязан к аккаунту.');
+      }
+    } catch (e) {
+      console.error('Ошибка VK ID:', e);
+      showMessage('❌', 'Ошибка', 'Не удалось войти через VK: ' + e.message);
+    }
+  });
 }
 
 // ==================== РАБОТА С ЛИНИЕЙ ====================
@@ -173,7 +282,6 @@ function addToLine(username, name) {
 
 function removeFromLine(username) {
   let list = getOnlineStaff();
-  const user = list.find(u => u.username === username);
   list = list.filter(u => u.username !== username);
   saveOnlineStaff(list);
 }
@@ -181,7 +289,10 @@ function removeFromLine(username) {
 // ==================== СТАТУСЫ (FIREBASE) ====================
 async function getStaffWithStatuses() {
   const snapshot = await database.ref('staff_statuses').once('value');
-  return snapshot.val() || [];
+  const data = snapshot.val();
+  if (!data) return [];
+  if (Array.isArray(data)) return data;
+  return Object.values(data);
 }
 
 async function saveStaffWithStatuses(list) {
