@@ -39,6 +39,13 @@ export default async function handler(req, res) {
   return res.status(404).send('Not found');
 }
 
+const ENV = {
+  VK_CONFIRMATION: 'd52398e7',
+  VK_SECRET: 'atp_secret_2026',
+  VK_CHAT_ID: '2',
+  FIREBASE_URL: 'https://mirngortrans-default-rtdb.europe-west1.firebasedatabase.app'
+};
+
 // ==================== ОБРАБОТКА СООБЩЕНИЙ ИЗ БЕСЕДЫ ====================
 async function handleVKCallback(req, res) {
   const body = req.body;
