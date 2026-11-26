@@ -40,10 +40,10 @@ export default async function handler(req, res) {
 }
 
 const ENV = {
-  VK_CONFIRMATION: 'd52398e7',
-  VK_SECRET: 'atp_secret_2026',
-  VK_CHAT_ID: '2',
-  FIREBASE_URL: 'https://mirngortrans-default-rtdb.europe-west1.firebasedatabase.app'
+  ENV.VK_CONFIRMATION: 'd52398e7',
+  ENV.VK_SECRET: 'atp_secret_2026',
+  ENV.VK_CHAT_ID: '2',
+  ENV.FIREBASE_URL: 'https://mirngortrans-default-rtdb.europe-west1.firebasedatabase.app'
 };
 
 // ==================== ОБРАБОТКА СООБЩЕНИЙ ИЗ БЕСЕДЫ ====================
