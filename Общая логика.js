@@ -372,16 +372,19 @@ async function getStaffStatus(username) {
 async function getActiveTime(username) {
   const staffList = await getStaffWithStatuses();
   const today = getMoscowDateOnly();
-  const todayRecord = staffList.find(s => 
-    s.username === username && s.exitDate === today
-  );
+  const todayRecord = staffList.find(s => s.username === username && s.exitDate === today);
   if (!todayRecord) return '00:00:00';
   
   let totalSeconds = todayRecord.totalSeconds || 0;
   if (todayRecord.status === STAFF_STATUSES.ONLINE && todayRecord.sessionStart) {
     const now = getMoscowTime();
     const sessionStart = new Date(todayRecord.sessionStart);
-    totalSeconds += Math.floor((now - sessionStart) / 1000);
+    
+    // Проверка: если дата из Firebase парсится корректно
+    if (!isNaN(sessionStart.getTime())) {
+      const diff = Math.floor((now - sessionStart) / 1000);
+      totalSeconds += Math.max(0, diff); // Защита от отрицательных чисел
+    }
   }
   return formatTime(totalSeconds);
 }
