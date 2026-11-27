@@ -377,13 +377,16 @@ async function getActiveTime(username) {
   
   let totalSeconds = todayRecord.totalSeconds || 0;
   if (todayRecord.status === STAFF_STATUSES.ONLINE && todayRecord.sessionStart) {
-    const now = getMoscowTime();
-    const sessionStart = new Date(todayRecord.sessionStart);
+    // Берем текущее время в UTC (миллисекунды)
+    const now = new Date().getTime(); 
+    // Парсим время из Firebase (оно уже с +03:00)
+    const sessionStart = new Date(todayRecord.sessionStart).getTime(); 
     
-    // Проверка: если дата из Firebase парсится корректно
-    if (!isNaN(sessionStart.getTime())) {
+    // Считаем разницу только если парсинг удался
+    if (!isNaN(sessionStart)) {
       const diff = Math.floor((now - sessionStart) / 1000);
-      totalSeconds += Math.max(0, diff); // Защита от отрицательных чисел
+      // Защита от отрицательных значений (если время поясов не сошлось)
+      totalSeconds += Math.max(0, diff); 
     }
   }
   return formatTime(totalSeconds);
