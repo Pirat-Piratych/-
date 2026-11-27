@@ -308,7 +308,7 @@ async function saveStaffWithStatuses(list) {
 
 async function setStaffStatus(username, name, status, afkReason = '') {
   let staffList = await getStaffWithStatuses();
-  const now = getMoscowTime();
+  const now = new Date();
   const today = getMoscowDateOnly();
 
   if (status === STAFF_STATUSES.ONLINE) {
