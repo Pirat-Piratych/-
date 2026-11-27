@@ -15,12 +15,6 @@ async function initLinePage() {
     if (notAuthMessage) notAuthMessage.style.display = 'block';
     if (lineContent) lineContent.style.display = 'none';
     return;
-      // Мгновенная реакция на изменения из беседы ВК
-  database.ref('staff_statuses').on('value', async () => {
-    await updateAllStats();
-    await loadStaffTable();
-    await updateStaffLists();
-  });
   }
 
   if (notAuthMessage) notAuthMessage.style.display = 'none';
@@ -261,4 +255,10 @@ async function initLinePage() {
         : offlineStaff.map(s => `<div class="staff-chip">${s.name}</div>`).join('');
     }
   }
+  // Мгновенная реакция на изменения из беседы ВК
+  database.ref('staff_statuses').on('value', async () => {
+    await updateAllStats();
+    await loadStaffTable();
+    await updateStaffLists();
+  });
 }
